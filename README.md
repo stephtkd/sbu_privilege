@@ -9,6 +9,8 @@ Le client privilégié sera placé (manuellement) dans le groupe `Client privil�
 Les clients peuvent aussi être des professionnels. Dans ce cas, ils seront placés (manuellement) dans le groupe `Professionnel`, après vérification de leur code privilège.  
 Il faut indiquer dans la configuration du module quel group joue le rôle du groupe `Commercial`  
 
+## Installation ##
+- Télécharger la version depuis github puis renommer l'archive en sbu_privilege (supprimer le n° de version) puis renommer le répertoire à l'intérieur de l'archive en sbu_privilege (supprimer le n° de version)
 
 ## Il reste à faire ##
 - le ménage dans le php (beaucoup de fonctions inutiles)

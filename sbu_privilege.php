@@ -87,6 +87,8 @@ class Sbu_privilege extends Module
 
         return parent::install() &&
             $this->registerHook('additionalCustomerFormFields') &&
+            $this->registerHook('actionObjectCustomerUpdateAfter') &&
+            $this->registerHook('actionObjectCustomerAddAfter') &&            
             $this->registerHook('actionCustomerGridDefinitionModifier') &&
             $this->registerHook('actionCustomerGridQueryBuilderModifier') &&
             $this->registerHook('actionCustomerFormBuilderModifier') &&
@@ -126,7 +128,82 @@ class Sbu_privilege extends Module
         ];
     }
 
+    /**
+     * Customer update in FO
+     */
+    public function hookactionObjectCustomerUpdateAfter($params)
+    {
+        $idCustomer = (int)$params['object']->id;
+        $this->writeModuleValues($idCustomer);
+    }
 
+    /**
+     * Customer add in FO
+     */
+    public function hookactionObjectCustomerAddAfter($params)
+    {
+        $idCustomer = (int)$params['object']->id;
+        $this->writeModuleValues($idCustomer);
+    }
+
+    /**
+     * Mutualiser la fonction avec updateCustomerPrivilegeCode (pas possible)
+     *
+     * @param integer $customerId
+     * @return void
+     */
+    public function writeModuleValues(int $customerId)
+    {
+        //error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code'));
+        $PrivilegeCodeValue=Tools::getValue('privilege_code');
+
+        /*
+        $query = 'UPDATE `'._DB_PREFIX_.'sbu_privilege` priv '
+            .' SET  priv.`privilege_code` = "'.pSQL($PrivilegeCodeValue).'"'
+            .' WHERE priv.id_customer = '.(int)$customerId;
+        
+        Db::getInstance()->execute($query);*/
+
+
+        // Visiblement la ligne suivante ne marche pas dans le contexte FO, donc je recherche le PrivilegeCodeId autrement
+        //$PrivilegeCodeId = $this->get('ps_sbu_privilege.repository.privilege_code')->findIdByCustomer($customerId);
+    
+        $sql = new DbQuery();
+        $sql->select('`id_privilege_code`')
+        ->from('sbu_privilege_code')
+        ->where('`id_customer` = '.pSQL($customerId));
+        //$sql->setParameter('customer_id', $customerId);
+
+        //$PrivilegeCodeId=Db::getInstance()->executeS($sql);
+        $PrivilegeCodeId=Db::getInstance()->getValue($sql);
+        
+        //return (int) $queryBuilder->execute()->fetch(PDO::FETCH_COLUMN);
+        //  return Db::getInstance()->executeS($sql);
+        //error_log("PrivilegeCodeId = ".$PrivilegeCodeId);
+        //error_log("PrivilegeCodeValue = ".$PrivilegeCodeValue);
+
+    
+        $privilegeCode = new PrivilegeCode($PrivilegeCodeId);
+        //error_log("privilegeCode = ".print_r($privilegeCode,true));
+        if (0 >= $privilegeCode->id) {
+            //error_log("je crée un nouveau privilege_code");
+            $privilegeCode = $this->createPrivilegeCode($customerId);
+        }
+        $privilegeCode->privilege_code = $PrivilegeCodeValue;
+        //error_log("privilegeCode = ".print_r($privilegeCode,true));
+
+        try {
+            if (false === $privilegeCode->update()) {
+                throw new CannotUpdatePrivilegeCodeValueException(
+                    sprintf('Failed to change privilege code with id "%s"', $privilegeCode->id)
+                );
+            }
+        } catch (PrestaShopException $exception) {
+            throw new CannotUpdatePrivilegeCodeValueException(
+                'An unexpected error occurred when updating privilege code'
+            );
+        }
+    }
     /**
      * Hook allows to modify Customers grid definition.
      * Add column privilege_code in admin customers grid in BO
@@ -362,12 +439,12 @@ class Sbu_privilege extends Module
      *
      * @throws CannotCreatePrivilegeCodeException
      */
-    protected function createPrivilegeCode(int $customerId)
+    protected function createPrivilegeCode(int $customerId, string $privilege_code ="")
     {
         try {
             $privilegeCode = new PrivilegeCode();
             $privilegeCode->id_customer = $customerId;
-            $privilegeCode->is_allowed_for_review = 0;
+            $privilegeCode->privilege_code = $privilege_code;
 
             if (false === $privilegeCode->save()) {
                 throw new CannotCreatePrivilegeCodeException(

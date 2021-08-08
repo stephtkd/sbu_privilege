@@ -56,6 +56,8 @@ function upgrade_module_1_1_0($module)
 
 
     return $module->registerHook('ActionAfterUpdateCustomerFormHandler') &&
+            $module->registerHook('actionObjectCustomerUpdateAfter') &&
+            $module->registerHook('actionObjectCustomerAddAfter') && 
             $module->registerHook('actionCustomerFormBuilderModifier') &&
             $module->registerHook('actionAfterCreateCustomerFormHandler') &&
             $module->registerHook('actionAfterUpdateCustomerFormHandler') ;

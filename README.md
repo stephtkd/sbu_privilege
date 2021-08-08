@@ -35,21 +35,22 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 
 ## Il reste à faire ##
 - le ménage dans le php (beaucoup de fonctions inutiles)
-- Modifier le formulaire de configuration du SBU_PRIVILEGE_COMMERCIAL_GROUP_ID pour proposer une les groupes en liste déroulante
-- modifier le formulaire de modification d'un client dans le BO pour permettre de modifier le code privilège
+- Modifier le formulaire de configuration du SBU_PRIVILEGE_COMMERCIAL_GROUP_ID pour proposer les groupes en liste déroulante
 - finir la traduction du module
 - ajouter une partie dans l'espace client pour afficher et modifier son code privilège (ou juste l'afficher)
 - faire la partie migration (pour passer d'une version à une autre avec sauvegarde du contenu de la BDD, sauvegarder le champ code privilège pour pouvoir le réinjecter post-migration)
 - permettre de faire des requêtes pour savoir les ventes réalisées par les clients ayant un code privilège donné (le code privilège correspond à un commercial qui se vera attribuer une commission sur toutes les ventes faites avec son code privilège)
 - permettre au commercial de suivre, depuis son espace client, la liste des ventes de ses clients et de connaître le montant de ses commissions
-- trouver une icone pour le module
 - Déplacer le champ privilege code dans le formulaire d'inscription dans le FO (pas possible)
 - Lors de la désinstallation, il faudrait faire un export des code_privileges pour éviter les erreurs de réinstallation
-
+- Mettre en place nouvelle traduction (trans et non l)
+- il faut rajouter le delete quand on efface un customer, il faut effacer le privilege_code
 
 ## Historique des versions ##
 - v 1.1.0  
 Modification d'architecture. Je n'utilise plus le champs code_privilege dans la table customer, mais je crée une nouvelle table exprès pour ça (pour éviter de modifier la table customer)
+- modifier le formulaire de modification d'un client dans le BO pour permettre de modifier le code privilège
+- trouver une icone pour le module
 
 - v 1.0.0  
 Modification du formulaire d'inscription pour ajouter le champ "code privilège"  

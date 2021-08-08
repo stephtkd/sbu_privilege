@@ -9,8 +9,29 @@ Le client privilégié sera placé (manuellement) dans le groupe `Client privil�
 Les clients peuvent aussi être des professionnels. Dans ce cas, ils seront placés (manuellement) dans le groupe `Professionnel`, après vérification de leur code privilège.  
 Il faut indiquer dans la configuration du module quel group joue le rôle du groupe `Commercial`  
 
+### versions PrestaShop Supportées
+
+ Ce module est compatible avec les versions 1.7.6.0 et supérieures.
+ 
+### Pré-requis
+ 
+  1. Composer, cf [Composer](https://getcomposer.org/) pour en savoir plus
+ 
+### How to install
+ 
+  1. Download or clone module into `modules` directory of your PrestaShop installation
+  2. Rename the directory to make sure that module directory is named `demoextendsymfonyform1`*
+  3. `cd` into module's directory and run following commands:
+      - `composer install` - to download dependencies into vendor folder
+  4. Install module from Back Office
+ 
+ *Because the name of the directory and the name of the main module file must match.
+
 ## Installation ##
-- Télécharger la version depuis github puis renommer l'archive en sbu_privilege (supprimer le n° de version) puis renommer le répertoire à l'intérieur de l'archive en sbu_privilege (supprimer le n° de version)
+  1. Télécharger la version depuis github puis renommer l'archive en sbu_privilege (supprimer le n° de version) puis renommer le répertoire à l'intérieur de l'archive en sbu_privilege (supprimer le n° de version)
+  2. `cd` dans le répertoire du module puis lancer la commande suivante :
+      - `composer install` - pour télécharger les dépendances dans le répertoire vendor
+  3. Installer le module depuis le Back Office
 
 ## Il reste à faire ##
 - le ménage dans le php (beaucoup de fonctions inutiles)
@@ -27,6 +48,9 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 
 
 ## Historique des versions ##
+- v 1.1.0  
+Modification d'architecture. Je n'utilise plus le champs code_privilege dans la table customer, mais je crée une nouvelle table exprès pour ça (pour éviter de modifier la table customer)
+
 - v 1.0.0  
 Modification du formulaire d'inscription pour ajouter le champ "code privilège"  
 Ajout du champ code privilege dans la liste des clients dans le BO  

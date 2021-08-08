@@ -1,0 +1,17 @@
+{
+    "name": "stephtkd/sbu_privilege_code",
+    "authors": [{
+        "name": "Stéphane Burlet"
+    }],
+    "description": "Manages privilege codes",
+    "autoload": {
+        "psr-4": {
+            "PrestaShop\\Module\\SbuPrivilegeCode\\": "src/"
+        }
+    },
+    "license": "MIT",
+    "type": "prestashop-module",
+    "config": {
+        "prepend-autoloader": false
+    }
+}

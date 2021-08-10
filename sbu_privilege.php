@@ -93,7 +93,8 @@ class Sbu_privilege extends Module
             $this->registerHook('actionCustomerGridQueryBuilderModifier') &&
             $this->registerHook('actionCustomerFormBuilderModifier') &&
             $this->registerHook('actionAfterCreateCustomerFormHandler') &&
-            $this->registerHook('actionAfterUpdateCustomerFormHandler') ;
+            $this->registerHook('actionAfterUpdateCustomerFormHandler') &&
+            $this->registerHook('actionObjectCustomerDeleteBefore') ;
     }
 
     public function uninstall()
@@ -338,6 +339,23 @@ class Sbu_privilege extends Module
         $this->updateCustomerPrivilegeCode($params);
     }
 
+/*    celui-là ne marche pas (pas appelé ?)
+public function hookActionAfterDeleteCustomerFormHandler(array $params)
+    {
+        $a="hookActionAfterDeleteCustomerFormHandler - BURLET - ";
+        error_log($a);
+        //$this->updateCustomerPrivilegeCode($params);
+        return true;
+    }*/
+
+    public function hookActionObjectCustomerDeleteBefore(array $params)
+    {
+        $a="hookActionObjectCustomerDeleteBefore - BURLET - ";
+        error_log($a);
+        //$this->updateCustomerPrivilegeCode($params);
+        return true;
+    }
+    
     public function hookActionCategoryFormBuilderModifier_OLD(array $params)
     {
         error_log("ActionCategoryFormBuilderModifier - BURLET");

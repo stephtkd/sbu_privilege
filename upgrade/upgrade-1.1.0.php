@@ -60,6 +60,7 @@ function upgrade_module_1_1_0($module)
             $module->registerHook('actionObjectCustomerAddAfter') && 
             $module->registerHook('actionCustomerFormBuilderModifier') &&
             $module->registerHook('actionAfterCreateCustomerFormHandler') &&
-            $module->registerHook('actionAfterUpdateCustomerFormHandler') ;
+            $module->registerHook('actionAfterUpdateCustomerFormHandler') &&
+            $module->registerHook('actionObjectCustomerDeleteBefore') ;
 
 }

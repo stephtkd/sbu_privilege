@@ -559,6 +559,14 @@ class Sbu_privilege extends Module
                         'name' => 'SBU_PRIVILEGE_ACCOUNT_PASSWORD',
                         'label' => $this->l('Password'),
                     ),
+                    array(
+                        'col' => 3,
+                        'type' => 'text',
+                        'prefix' => '<i class="icon icon-envelope"></i>',
+                        'desc' => $this->l('Select group for commercial'),
+                        'name' => 'SBU_PRIVILEGE_COMMERCIAL_GROUP_ID',
+                        'label' => $this->l('Group for commercials'),
+                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
@@ -576,6 +584,7 @@ class Sbu_privilege extends Module
             'SBU_PRIVILEGE_LIVE_MODE' => Configuration::get('SBU_PRIVILEGE_LIVE_MODE', true),
             'SBU_PRIVILEGE_ACCOUNT_EMAIL' => Configuration::get('SBU_PRIVILEGE_ACCOUNT_EMAIL', 'contact@prestashop.com'),
             'SBU_PRIVILEGE_ACCOUNT_PASSWORD' => Configuration::get('SBU_PRIVILEGE_ACCOUNT_PASSWORD', null),
+            'SBU_PRIVILEGE_COMMERCIAL_GROUP_ID' => Configuration::get('SBU_PRIVILEGE_COMMERCIAL_GROUP_ID', null),
         );
     }
 

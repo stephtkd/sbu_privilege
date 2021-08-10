@@ -25,14 +25,13 @@
 */
 $sql = array();
 
-$sql[] = "ALTER TABLE `"._DB_PREFIX_."customer` ADD `privilege_code` VARCHAR(255) NULL AFTER `birthday`";
-
-/*
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sbu_privilege` (
-    `id_sbu_privilege` int(11) NOT NULL AUTO_INCREMENT,
-    PRIMARY KEY  (`id_sbu_privilege`)
+$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sbu_privilege_code` (
+    `id_privilege_code` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    `id_customer` INT(10) UNSIGNED NOT NULL,
+    `privilege_code` VARCHAR(50) NULL DEFAULT NULL,
+    PRIMARY KEY  (`id_privilege_code`)
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
-*/
+
 
 foreach ($sql as $query) {
     if (Db::getInstance()->execute($query) == false) {

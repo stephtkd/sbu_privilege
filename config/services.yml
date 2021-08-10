@@ -1,0 +1,8 @@
+services:
+  _defaults:
+    public: true
+  ps_sbu_privilege.repository.privilege_code:
+    class: 'PrestaShop\Module\SbuPrivilegeCode\Repository\PrivilegeCodeRepository'
+    arguments:
+      - '@doctrine.dbal.default_connection'
+      - '%database_prefix%'

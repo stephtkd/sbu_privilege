@@ -32,13 +32,35 @@ if (!defined('_PS_VERSION_')) {
  * usefull when you modify your database, or register a new hook ...
  * Don't forget to create one file per version.
  */
-function upgrade_module_1_0_1($module)
+function upgrade_module_1_1_0($module)
 {
     /*
      * Do everything you want right there,
      * You could add a column in one of your module's tables
      */
     error_log("upgrade upgrade_module ".$module->name." - v".$module->version);
-    return true;
+
+    $sql[] = "ALTER TABLE `"._DB_PREFIX_."customer` DROP `privilege_code`";
+    $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sbu_privilege_code` (
+        `id_privilege_code` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+        `id_customer` INT(10) UNSIGNED NOT NULL,
+        `privilege_code` VARCHAR(50) NULL DEFAULT NULL,
+        PRIMARY KEY  (`id_privilege_code`)
+    ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+    
+    foreach ($sql as $query) {
+        if (Db::getInstance()->execute($query) == false) {
+            return false;
+        }
+    }
+
+
+    return $module->registerHook('ActionAfterUpdateCustomerFormHandler') &&
+            $module->registerHook('actionObjectCustomerUpdateAfter') &&
+            $module->registerHook('actionObjectCustomerAddAfter') && 
+            $module->registerHook('actionCustomerFormBuilderModifier') &&
+            $module->registerHook('actionAfterCreateCustomerFormHandler') &&
+            $module->registerHook('actionAfterUpdateCustomerFormHandler') &&
+            $module->registerHook('actionObjectCustomerDeleteBefore') ;
 
 }

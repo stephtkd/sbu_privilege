@@ -293,8 +293,8 @@ class Sbu_privilege extends Module
         $filters = $searchCriteria->getFilters();
         foreach ($filters as $filterName => $filterValue) {
             if ('privilege_code' === $filterName) {
-                $searchQueryBuilder->andWhere('priv.`privilege_code` = :param_privilege_code');
-                $searchQueryBuilder->setParameter('param_privilege_code', $filterValue);
+                $searchQueryBuilder->andWhere('priv.`privilege_code` LIKE :param_privilege_code');
+                $searchQueryBuilder->setParameter('param_privilege_code', "%".$filterValue."%");
                 //if (isset($strictComparisonFilters[$filterName])) {
                 //    $alias = $strictComparisonFilters[$filterName];
                 //    $searchQueryBuilder->andWhere("$alias LIKE :$filterName");

@@ -95,6 +95,7 @@ class Sbu_privilege extends Module
             $this->registerHook('actionCustomerFormBuilderModifier') &&
             $this->registerHook('actionAfterCreateCustomerFormHandler') &&
             $this->registerHook('actionAfterUpdateCustomerFormHandler') &&
+  //          $this->registerHook('displayCustomerAccountForm') &&
             $this->registerHook('actionObjectCustomerDeleteBefore');
     }
 
@@ -109,8 +110,19 @@ class Sbu_privilege extends Module
         return parent::uninstall();
     }
 
+//    public function hookdisplayCustomerAccountForm($params)
+//    {
+        //echo "AdditionalCustomerFormFields - BURLET";
+        //$a="displayCustomerAccountForm - BURLET - ";
+        //$a=$a.print_r($params,true);
+        //error_log($a);
+        /*echo "<pre>";
+        print_r($params);
+        echo "</pre>";*/
+//    }
+
     /**
-     * Add additionnel field (privilege_code) in customer registration form in FO
+     * Add additionnel field (privilege_code) in customer registration form in FO and in my account>>my information in FO
      * @param type $params
      */
     public function hookAdditionalCustomerFormFields($params)
@@ -128,6 +140,7 @@ class Sbu_privilege extends Module
                 ->setType('text')
                 //->setRequired(true) Décommenter pour rendre obligatoire
                 ->setLabel($this->l('Privilege Code'))
+                ->setValue("John")
         ];
     }
 
@@ -157,7 +170,7 @@ class Sbu_privilege extends Module
      */
     public function writeModuleValues(int $customerId)
     {
-        //error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code'));
+        error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code'));
         $PrivilegeCodeValue = Tools::getValue('privilege_code');
 
         /*

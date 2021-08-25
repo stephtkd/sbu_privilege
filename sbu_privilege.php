@@ -140,7 +140,6 @@ class Sbu_privilege extends Module
                 ->setType('text')
                 //->setRequired(true) Décommenter pour rendre obligatoire
                 ->setLabel($this->l('Privilege Code'))
-                ->setValue("John")
         ];
     }
 
@@ -170,7 +169,7 @@ class Sbu_privilege extends Module
      */
     public function writeModuleValues(int $customerId)
     {
-        error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code'));
+        //error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code'));
         $PrivilegeCodeValue = Tools::getValue('privilege_code');
 
         /*
@@ -365,15 +364,15 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
     public function hookActionObjectCustomerDeleteBefore(array $params)
     {
-        $a = "hookActionObjectCustomerDeleteBefore - BURLET - ";
-        error_log($a);
+        //$a = "hookActionObjectCustomerDeleteBefore - BURLET - ";
+        //error_log($a);
         $this->deleteCustomerPrivilegeCode($params);
     }
 
     public function hookActionCategoryFormBuilderModifier_OLD(array $params)
     {
-        error_log("ActionCategoryFormBuilderModifier - BURLET");
-        error_log(print_r($params['data'], true));
+        //error_log("ActionCategoryFormBuilderModifier - BURLET");
+        //error_log(print_r($params['data'], true));
         //Récupération du form builder
         /** @var \Symfony\Component\Form\FormBuilder $formBuilder */
         $formBuilder = $params['form_builder'];

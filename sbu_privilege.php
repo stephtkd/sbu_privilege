@@ -139,7 +139,7 @@ class Sbu_privilege extends Module
                 ->setName('privilege_code')
                 ->setType('text')
                 //->setRequired(true) Décommenter pour rendre obligatoire
-                ->setLabel($this->l('Privilege Code'))
+                ->setLabel($this->getTranslator()->trans('Privilege Code', [], 'Modules.Sbu_privilege.FO'))
         ];
     }
 
@@ -209,13 +209,14 @@ class Sbu_privilege extends Module
 
         try {
             if (false === $privilegeCode->update()) {
+                $msg=$this->getTranslator()->trans('Failed to change privilege code with id', [], 'Modules.Sbu_privilege.Exception');
                 throw new CannotUpdatePrivilegeCodeValueException(
-                    sprintf('Failed to change privilege code with id "%s"', $privilegeCode->id)
+                    sprintf('%s %s', $msg, $privilegeCode->id)
                 );
             }
         } catch (PrestaShopException $exception) {
             throw new CannotUpdatePrivilegeCodeValueException(
-                'An unexpected error occurred when updating privilege code'
+                $this->getTranslator()->trans('An unexpected error occurred when updating privilege code', [], 'Modules.Sbu_privilege.Exception')
             );
         }
     }
@@ -234,7 +235,7 @@ class Sbu_privilege extends Module
 
         // Add column
         $ColumnPrivilegeCode = new DataColumn('privilege_code');
-        $ColumnPrivilegeCode->setName($this->l('Privilege Code'));
+        $ColumnPrivilegeCode->setName($this->getTranslator()->trans('Privilege Code', [], 'Modules.Sbu_privilege.Admin'));
         $ColumnPrivilegeCode->setOptions([
             'field' => 'privilege_code',
         ]);
@@ -317,7 +318,7 @@ class Sbu_privilege extends Module
         $formBuilder = $params['form_builder'];
 
         $formBuilder->add('privilege_code', TextType::class, [
-            'label' => $this->l('Privilege Code'),
+            'label' => $this->getTranslator()->trans('Privilege Code', [], 'Modules.Sbu_privilege.Admin'),
             'required' => false,
         ]);
 
@@ -449,13 +450,14 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
             try {
                 if (false === $privilegeCode->delete()) {
+                    $msg=$this->getTranslator()->trans('Failed to change privilege code with id', [], 'Modules.Sbu_privilege.Exception');
                     throw new CannotDeletePrivilegeCodeValueException(
-                        sprintf('Failed to delete privilege code with id "%s"', $privilegeCode->id)
+                        sprintf('%s %s', $msg, $privilegeCode->id)
                     );
                 }
             } catch (PrestaShopException $exception) {
                 throw new CannotDeletePrivilegeCodeValueException(
-                    'An unexpected error occurred when deleting privilege code'
+                    $this->getTranslator()->trans('An unexpected error occurred when updating privilege code', [], 'Modules.Sbu_privilege.Exception')
                 );
             }
         }
@@ -484,13 +486,14 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
         try {
             if (false === $privilegeCode->update()) {
+                $msg=$this->getTranslator()->trans('Failed to change privilege code with id', [], 'Modules.Sbu_privilege.Exception');
                 throw new CannotUpdatePrivilegeCodeValueException(
-                    sprintf('Failed to change privilege code with id "%s"', $privilegeCode->id)
+                    sprintf('%s %s', $msg, $privilegeCode->id)
                 );
             }
         } catch (PrestaShopException $exception) {
             throw new CannotUpdatePrivilegeCodeValueException(
-                'An unexpected error occurred when updating privilege code'
+                $this->getTranslator()->trans('An unexpected error occurred when updating privilege code', [], 'Modules.Sbu_privilege.Exception')
             );
         }
     }
@@ -512,17 +515,21 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
             $privilegeCode->privilege_code = $privilege_code;
 
             if (false === $privilegeCode->save()) {
+                $msg=$this->getTranslator()->trans('An error occurred when creating privilegeCode with customer id', [], 'Modules.Sbu_privilege.Exception');
                 throw new CannotCreatePrivilegeCodeException(
                     sprintf(
-                        'An error occurred when creating privilegeCode with customer id "%s"',
+                        '%s %s',
+                        $msg,
                         $customerId
                     )
                 );
             }
         } catch (PrestaShopException $exception) {
-            throw new CannotCreatePrivilegeCodeException(
+                $msg=$this->getTranslator()->trans('An error occurred when creating privilegeCode with customer id', [], 'Modules.Sbu_privilege.Exception');
+                throw new CannotCreatePrivilegeCodeException(
                 sprintf(
-                    'An unexpected error occurred when creating privilegeCode with customer id "%s"',
+                    '%s %s',
+                    $msg,
                     $customerId
                 ),
                 0,

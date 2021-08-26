@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: composer install
       - name: Run PHP-CS-Fixer
-        run: pwd && ls -l && ./vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --diff-format udiff
+        run: pwd && ls -l && && cat .php-cs-fixer.dist.php && ./vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --diff-format udiff -vvv
   deploy:
     name: build dependencies & create artifact
     runs-on: ubuntu-latest

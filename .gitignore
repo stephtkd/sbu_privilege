@@ -5,4 +5,5 @@
 /views/node_modules
 !vendor/index.php
 !vendor/.htaccess
+/.php-cs-fixer.dist.php
 /.php_cs.cache

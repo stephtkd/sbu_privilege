@@ -1,5 +1,4 @@
 /config_*.xml
-/translations/*.php
 /node_modules
 /vendor
 /views/node_modules

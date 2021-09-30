@@ -56,22 +56,12 @@ class Sbu_privilege extends Module
 
         parent::__construct();
 
-        $this->displayName = $this->trans('Manage privileges', [], 'Modules.Sbuprivilege.Admin');
-        $this->description = $this->trans('Manages privilege codes. Every commercial in a special group will receive (from the webmaster) a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code (new field "privilege_code" in customer table). This privilege code allows the commercial to receive commissions on every sale from its customers. It\'s better to affect the customer into a group "Privileged Customer" and affect to this group cart rules. The configuration determines which group will be the "Commercial" group. Recommanded : "Commercial".', [], 'Modules.Sbuprivilege.Admin');
+        $this->displayName = $this->l('Manage privileges');
+        $this->description = $this->l('Manages privilege codes. Every commercial in a special group will receive (from the webmaster) a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code (new field "privilege_code" in customer table). This privilege code allows the commercial to receive commissions on every sale from its customers. It\'s better to affect the customer into a group "Privileged Customer" and affect to this group cart rules. The configuration determines which group will be the "Commercial" group. Recommanded : "Commercial".');
 
-        $this->confirmUninstall = $this->trans('Are you sure you want to uninstall privilege? This will delete all privilege codes.', [], 'Modules.Sbuprivilege.Admin');
+        $this->confirmUninstall = $this->l('Are you sure you want to uninstall privilege? This will delete all privilege codes.');
 
         $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
-    }
-
-    /**
-     * This function is required in order to make module compatible with new translation system.
-     *
-     * @return bool
-     */
-    public function isUsingNewTranslationSystem()
-    {
-        return true;
     }
 
 
@@ -140,7 +130,7 @@ class Sbu_privilege extends Module
                 ->setName('privilege_code')
                 ->setType('text')
                 //->setRequired(true) Décommenter pour rendre obligatoire
-                ->setLabel($this->trans('Privilege Code', [], 'Modules.Sbuprivilege.FO'))
+                ->setLabel($this->l('Privilege Code'))
         ];
     }
 
@@ -210,14 +200,14 @@ class Sbu_privilege extends Module
 
         try {
             if (false === $privilegeCode->update()) {
-                $msg=$this->trans('Failed to change privilege code with id', [], 'Modules.Sbuprivilege.Exception');
+                $msg=$this->l('Failed to change privilege code with id');
                 throw new CannotUpdatePrivilegeCodeValueException(
                     sprintf('%s %s', $msg, $privilegeCode->id)
                 );
             }
         } catch (PrestaShopException $exception) {
             throw new CannotUpdatePrivilegeCodeValueException(
-                $this->trans('An unexpected error occurred when updating privilege code', [], 'Modules.Sbuprivilege.Exception')
+                $this->l('An unexpected error occurred when updating privilege code')
             );
         }
     }
@@ -236,7 +226,7 @@ class Sbu_privilege extends Module
 
         // Add column
         $ColumnPrivilegeCode = new DataColumn('privilege_code');
-        $ColumnPrivilegeCode->setName($this->trans('Privilege Code', [], 'Modules.Sbuprivilege.Admin'));
+        $ColumnPrivilegeCode->setName($this->l('Privilege Code'));
         $ColumnPrivilegeCode->setOptions([
             'field' => 'privilege_code',
         ]);
@@ -319,13 +309,13 @@ class Sbu_privilege extends Module
         $formBuilder = $params['form_builder'];
 
         $formBuilder->add('privilege_code', TextType::class, [
-            'label' => $this->trans('Privilege Code', [], 'Modules.Sbuprivilege.Admin'),
+            'label' => $this->l('Privilege Code'),
             'required' => false,
         ]);
 
         /*
         SwitchType::class, [
-            'label' => $this->trans('Privilege Code'),
+            'label' => $this->l('Privilege Code'),
             'required' => false,
         ]);*/
 
@@ -387,20 +377,20 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
             // et spécificiques prestashop https://devdocs.prestashop.com/1.7/development/components/form/types-reference/
             \Symfony\Component\Form\Extension\Core\Type\TextType::class,
             [
-                'label' => $this->trans('Custom field 1'), //Label du champ
+                'label' => $this->l('Custom field 1'), //Label du champ
                 'required' => false, //Requis ou non
                 'constraints' => [ //Contraintes du champs
                     //cf. génériques symfony : https://symfony.com/doc/current/reference/constraints.html
                     // Ou vous pouvez écrire la votre cf. https://symfony.com/doc/current/validation/custom_constraint.html
                     new \Symfony\Component\Validator\Constraints\Length([
                         'max' => 20,
-                        'maxMessage' => $this->trans('Max caracters allowed : 20'),
+                        'maxMessage' => $this->l('Max caracters allowed : 20'),
                     ]),
                 ],
                 //La valeur peut être setée ici
                 'data' => 'test valeur', //Valeur du champ
                 // Texte d'aide
-                'help' => $this->trans('help text 2')
+                'help' => $this->l('help text 2')
             ]
         );
 
@@ -413,7 +403,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
             // cf. https://devdocs.prestashop.com/1.7/development/components/form/types-reference/
             \PrestaShopBundle\Form\Admin\Type\TranslatableType::class,
             [
-                'label' => $this->trans('Custom field Lang'), //Label du champ
+                'label' => $this->l('Custom field Lang'), //Label du champ
                 'required' => false, //Requis ou non
                 'type' => \Symfony\Component\Form\Extension\Core\Type\TextType::class // OU TextAreaType::class
             ]
@@ -451,14 +441,14 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
             try {
                 if (false === $privilegeCode->delete()) {
-                    $msg=$this->trans('Failed to change privilege code with id', [], 'Modules.Sbuprivilege.Exception');
+                    $msg=$this->l('Failed to change privilege code with id');
                     throw new CannotDeletePrivilegeCodeValueException(
                         sprintf('%s %s', $msg, $privilegeCode->id)
                     );
                 }
             } catch (PrestaShopException $exception) {
                 throw new CannotDeletePrivilegeCodeValueException(
-                    $this->trans('An unexpected error occurred when updating privilege code', [], 'Modules.Sbuprivilege.Exception')
+                    $this->l('An unexpected error occurred when updating privilege code')
                 );
             }
         }
@@ -487,14 +477,14 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
         try {
             if (false === $privilegeCode->update()) {
-                $msg=$this->trans('Failed to change privilege code with id', [], 'Modules.Sbuprivilege.Exception');
+                $msg=$this->l('Failed to change privilege code with id');
                 throw new CannotUpdatePrivilegeCodeValueException(
                     sprintf('%s %s', $msg, $privilegeCode->id)
                 );
             }
         } catch (PrestaShopException $exception) {
             throw new CannotUpdatePrivilegeCodeValueException(
-                $this->trans('An unexpected error occurred when updating privilege code', [], 'Modules.Sbuprivilege.Exception')
+                $this->l('An unexpected error occurred when updating privilege code')
             );
         }
     }
@@ -516,7 +506,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
             $privilegeCode->privilege_code = $privilege_code;
 
             if (false === $privilegeCode->save()) {
-                $msg=$this->trans('An error occurred when creating privilegeCode with customer id', [], 'Modules.Sbuprivilege.Exception');
+                $msg=$this->l('An error occurred when creating privilegeCode with customer id');
                 throw new CannotCreatePrivilegeCodeException(
                     sprintf(
                         '%s %s',
@@ -526,7 +516,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
                 );
             }
         } catch (PrestaShopException $exception) {
-                $msg=$this->trans('An error occurred when creating privilegeCode with customer id', [], 'Modules.Sbuprivilege.Exception');
+                $msg=$this->l('An error occurred when creating privilegeCode with customer id');
                 throw new CannotCreatePrivilegeCodeException(
                 sprintf(
                     '%s %s',
@@ -596,26 +586,26 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
         return array(
             'form' => array(
                 'legend' => array(
-                    'title' => $this->trans('Settings'),
+                    'title' => $this->l('Settings'),
                     'icon' => 'icon-cogs',
                 ),
                 'input' => array(
                     array(
                         'type' => 'switch',
-                        'label' => $this->trans('Live mode'),
+                        'label' => $this->l('Live mode'),
                         'name' => 'SBU_PRIVILEGE_LIVE_MODE',
                         'is_bool' => true,
-                        'desc' => $this->trans('Use this module in live mode'),
+                        'desc' => $this->l('Use this module in live mode'),
                         'values' => array(
                             array(
                                 'id' => 'active_on',
                                 'value' => true,
-                                'label' => $this->trans('Enabled')
+                                'label' => $this->l('Enabled')
                             ),
                             array(
                                 'id' => 'active_off',
                                 'value' => false,
-                                'label' => $this->trans('Disabled')
+                                'label' => $this->l('Disabled')
                             )
                         ),
                     ),
@@ -623,26 +613,26 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
                         'col' => 3,
                         'type' => 'text',
                         'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->trans('Enter a valid email address'),
+                        'desc' => $this->l('Enter a valid email address'),
                         'name' => 'SBU_PRIVILEGE_ACCOUNT_EMAIL',
-                        'label' => $this->trans('Email'),
+                        'label' => $this->l('Email'),
                     ),
                     array(
                         'type' => 'password',
                         'name' => 'SBU_PRIVILEGE_ACCOUNT_PASSWORD',
-                        'label' => $this->trans('Password'),
+                        'label' => $this->l('Password'),
                     ),
                     array(
                         'col' => 3,
                         'type' => 'text',
                         'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->trans('Select group for commercial'),
+                        'desc' => $this->l('Select group for commercial'),
                         'name' => 'SBU_PRIVILEGE_COMMERCIAL_GROUP_ID',
-                        'label' => $this->trans('Group for commercials'),
+                        'label' => $this->l('Group for commercials'),
                     ),
                 ),
                 'submit' => array(
-                    'title' => $this->trans('Save'),
+                    'title' => $this->l('Save'),
                 ),
             ),
         );

@@ -56,4 +56,6 @@ function upgrade_module_1_2_0($module)
         error_log("query ok");
     }
     error_log("upgrade module " . $module->name . " - v" . $module->version . " OK");
+
+    return true;
 }

@@ -45,7 +45,7 @@ class Sbu_privilege extends Module
     {
         $this->name = 'sbu_privilege';
         $this->tab = 'others';
-        $this->version = '1.1.0';
+        $this->version = '1.2.0';
         $this->author = 'Stéphane Burlet';
         $this->need_instance = 0;
 
@@ -57,9 +57,9 @@ class Sbu_privilege extends Module
         parent::__construct();
 
         $this->displayName = $this->l('Manage privileges');
-        $this->description = $this->l('Manages privilege codes. Every commercial in a special group will receive (from the webmaster) a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code (new field "privilege_code" in customer table). This privilege code allows the commercial to receive commissions on every sale from its customers. It\'s better to affect the customer into a group "Privileged Customer" and affect to this group cart rules. The configuration determines which group will be the "Commercial" group. Recommanded : "Commercial".');
+        $this->description = $this->l('Manages privilege codes. Every commercial will receive (from the webmaster) a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code (new field "privilege_code" in customer table). This privilege code allows the commercial to receive commissions on every sale from its customers. The customer should be polaced into a group "Privileged Customer" and affect to this group cart rules. If the customer is a professionel, then he should be placed into a group "Privileged professional". The configuration determines which group will be the "Sponsor" group. Recommanded : either "Pro sponsor" or "Private sponsor".');
 
-        $this->confirmUninstall = $this->l('Are you sure you want to uninstall privilege? This will delete all privilege codes.');
+        $this->confirmUninstall = $this->l('Are you sure you want to uninstall Manage privilege? This will delete all privilege codes.');
 
         $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
     }
@@ -126,6 +126,11 @@ class Sbu_privilege extends Module
         print_r($params);
         echo "</pre>";*/
         return [
+            (new FormField)
+            ->setName('private_sponsor')
+            ->setType('checkbox')
+            //->setRequired(true) Décommenter pour rendre obligatoire
+            ->setLabel($this->l('Sign up to become a private sponsor (I certify I\'m 18 years old or above)')),
             (new FormField)
                 ->setName('privilege_code')
                 ->setType('text')

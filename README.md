@@ -2,12 +2,14 @@
 
 ## Description ##
 
-Permet de mettre en place un système de parrainage appelé `code privilège`.  
-Les clients s'inscrivent avec un code privilège qui correspond au code d'un commercial. Le commercial touchera des commissions sur toutes les ventes effectuées avec son code privilège.  
-Le commercial doit être placé (manuellement) dans le groupe `Commercial`, après validation de son identité.  
-Le client privilégié sera placé (manuellement) dans le groupe `Client privilégié`, après vérification de son code privilège.  
-Les clients peuvent aussi être des professionnels. Dans ce cas, ils seront placés (manuellement) dans le groupe `Professionnel`, après vérification de leur code privilège.  
-Il faut indiquer dans la configuration du module quel group joue le rôle du groupe `Commercial`  
+Permet de mettre en place un système de parrainage (ou d'affiliation) appelé `code privilège`.  
+D'un côté, on a les "parrains", appelés "parrains particuliers" s'ils sont particuliers ou "parrains pro" s'ils sont professionnels (on peut aussi dire "commerciaux").  
+Les clients s'inscrivent avec un code privilège qui correspond au code d'un parrain. Le parrain touchera des commissions sur toutes les ventes effectuées avec son code privilège.  
+Le parrain doit être placé (manuellement) dans le groupe `Parrain pro` pour un professionnel, après validation de son identité.  
+Le parrain doit être placé (manuellement) dans le groupe `Parrain particulier` pour un particulier, après validation de son identité.  
+Le client privilégié doit être placé (manuellement) dans le groupe `Client privilégié`, après vérification de son code privilège.  
+Le client peuvt aussi être un professionnel. Dans ce cas, il doit être placé (manuellement) dans le groupe `Professionnel privilégié`, après vérification de son code privilège.  
+Il faut indiquer dans la configuration du module quel group joue le rôle du groupe `Parrains Pro` et quel groupe joue le rôle de `Parrain particulier`  
 
 ## versions PrestaShop Supportées ##
 
@@ -20,7 +22,7 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 ## Installation ##
   1. Télécharger la version depuis github puis renommer l'archive en sbu_privilege (supprimer le n° de version) puis renommer le répertoire à l'intérieur de l'archive en sbu_privilege (supprimer le n° de version)
   2. `cd` dans le répertoire du module puis lancer la commande suivante :
-      - `composer install` - pour télécharger les dépendances dans le répertoire vendor
+      - `composer install` - pour télécharger les dépendances dans le répertoire vendor (au final, pas utile. Ca fait planter cs_fixer)
   3. Installer le module depuis le Back Office
 
 ## Il reste à faire ##
@@ -32,13 +34,13 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 - permettre de faire des requêtes pour savoir les ventes réalisées par les clients ayant un code privilège donné (le code privilège correspond à un commercial qui se vera attribuer une commission sur toutes les ventes faites avec son code privilège)
 - permettre au commercial de suivre, depuis son espace client, la liste des ventes de ses clients et de connaître le montant de ses commissions
 - Déplacer le champ privilege code dans le formulaire d'inscription dans le FO (pas possible)
-- Lors de la désinstallation, il faudrait faire un export des code_privileges pour éviter les erreurs de réinstallation
-- Mettre en place nouvelle traduction (trans et non l)
+- Lors de la désinstallation, il faudrait faire un export des code_privileges pour éviter les erreurs de réinstallation (persone ne le fait dans aucun module)
+- ajouter la possibilité de s'inscrire en tant que parrain particulier
 
 
 ## Historique des versions ##
 ### v 1.2.0  ###
-- il faut rajouter le delete quand on efface un customer, il faut effacer le privilege_code
+- Gestion de la suppression du customer, on efface alors le privilege_code
 
 ### v 1.1.0  ###
 - Modification d'architecture. Je n'utilise plus le champs code_privilege dans la table customer, mais je crée une nouvelle table exprès pour ça (pour éviter de modifier la table customer)

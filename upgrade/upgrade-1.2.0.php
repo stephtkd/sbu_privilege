@@ -23,19 +23,29 @@
 *  @license   http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
 *  International Registered Trademark & Property of PrestaShop SA
 */
-$sql = array();
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
-$sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sbu_privilege_code` (
-    `id_privilege_code` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `id_customer` INT(10) UNSIGNED NOT NULL,
-    `privilege_code` VARCHAR(50) NULL DEFAULT NULL,
-    `private_sponsor` TINYINT NULL DEFAULT \'0\',
-    PRIMARY KEY  (`id_privilege_code`)
-) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
+/**
+ * This function updates your module from previous versions to the version 1.1,
+ * usefull when you modify your database, or register a new hook ...
+ * Don't forget to create one file per version.
+ */
+function upgrade_module_1_2_0($module)
+{
+    /*
+     * Do everything you want right there,
+     * You could add a column in one of your module's tables
+     */
+    error_log("upgrade upgrade_module ".$module->name." - v".$module->version);
 
-
-foreach ($sql as $query) {
-    if (Db::getInstance()->execute($query) == false) {
-        return false;
+    $sql[] = "ALTER TABLE `"._DB_PREFIX_."sbu_privilege_code` ADD `private_sponsor` TINYINT NULL DEFAULT \'0\' AFTER `privilege_code`";
+    
+    foreach ($sql as $query) {
+        if (Db::getInstance()->execute($query) == false) {
+            return false;
+        }
     }
+
 }

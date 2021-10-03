@@ -1,10 +1,44 @@
-name: Build & Release draft
-on: [push, workflow_dispatch]
+name: PHP CS Fixer & Build & Release draft
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
+    # Check there is no syntax errors in the project
+  php-linter:
+    name: PHP Syntax check 7.2|7.3|7.4
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      - name: PHP syntax checker 7.2
+        uses: prestashop/github-action-php-lint/7.2@master
+      - name: PHP syntax checker 7.3
+        uses: prestashop/github-action-php-lint/7.3@master
+      - name: PHP syntax checker 7.4
+        uses: prestashop/github-action-php-lint/7.4@master
+ # Check the PHP code follow the coding standards
+  php-cs-fixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
+      - name: Checkout
+        uses: actions/checkout@v2.0.0
+      - name: Cache dependencies
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: php-${{ hashFiles('composer.lock') }}
+      - name: Install dependencies
+        run: composer install
+      - name: Run PHP-CS-Fixer
+        run: ./vendor/bin/php-cs-fixer fix --dry-run --diff --using-cache=no --diff-format udiff -vvv
   deploy:
     name: build dependencies & create artifact
     runs-on: ubuntu-latest
+    needs: [php-linter, php-cs-fixer]
     steps:
       - name: Checkout
         uses: actions/checkout@v2.0.0

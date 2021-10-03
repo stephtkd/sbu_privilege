@@ -6,7 +6,7 @@ $_MODULE = array();
 $_MODULE['<{sbu_privilege}prestashop>sbu_privilege_32a4d94fe40291ae21f8e2d1ae990a07'] = 'Gestion des Codes Privilèges';
 $_MODULE['<{sbu_privilege}prestashop>sbu_privilege_2f693105c04e4dad843875050a98e79e'] = 'Êtes-vous sûr de vouloir désinstaller le module privilege? Ceci effacera définitivement tous les codes privilèges renseignés.';
 $_MODULE['<{sbu_privilege}prestashop>sbu_privilege_9117532bea193faec02602fd6e84a208'] = 'Je souhaite devenir affilié (je certifie être majeur)';
-$_MODULE['<{sbu_privilege}prestashop>sbu_privilege_2fd1c38103797d61123429c45ed89f26'] = 'Code Privilège';
+$_MODULE['<{sbu_privilege}prestashop>sbu_privilege_2fd1c38103797d61123429c45ed89f26'] = 'Code Partenaire';
 $_MODULE['<{sbu_privilege}prestashop>sbu_privilege_01bc5de997fef9bd20ece03ff8e41e8e'] = 'Parrain particulier';
 
 // A supprimer

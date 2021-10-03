@@ -54,5 +54,6 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 - Création du champ privilege_code dans la table customer lors de l'installation et suppression du champ lors de la désinstallation.
 
 ### ATTENTION ###
-Si je fais cun composer install, ça va installer friendsofphp/php-cs-fixer qui va installer un tas de dépependances dont polyfill-intl-normalizer qui est incompatible avec le système de traduction
-Du coup, je n'installe pas ces dépendances en local, je n'en ai pas besoin (seumlement dans git workflow)
+Si je fais un composer install, ça va installer friendsofphp/php-cs-fixer qui va installer un tas de dépependances dont polyfill-intl-normalizer qui est incompatible avec le système de traduction
+Du coup, je n'installe pas ces dépendances en local, je n'en ai pas besoin (seulement dans git workflow)
+

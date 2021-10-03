@@ -33,6 +33,7 @@ class PrivilegeCode extends ObjectModel
         'fields' => [
             'id_customer' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
             'privilege_code' => ['type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'size' => 45],
+            'private_sponsor' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
         ],
     ];
 }

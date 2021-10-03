@@ -57,7 +57,7 @@ class Sbu_privilege extends Module
         parent::__construct();
 
         $this->displayName = $this->l('Manage privileges');
-        $this->description = $this->l('Manages privilege codes. Every commercial will receive (from the webmaster) a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code (new field "privilege_code" in customer table). This privilege code allows the commercial to receive commissions on every sale from its customers. The customer should be polaced into a group "Privileged Customer" and affect to this group cart rules. If the customer is a professionel, then he should be placed into a group "Privileged professional". The configuration determines which group will be the "Sponsor" group. Recommanded : either "Pro sponsor" or "Private sponsor".');
+        $this->description = $this->l('Manages privilege codes. Every commercial will receive a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code. This privilege code allows the commercial to receive commissions on every sale from its customers. The customer should be placed into a group "Privileged Customer" and cart rules should be affected to this group. If the customer is a professionel, then he should be placed into a group "Privileged professional". The configuration determines which group will be the "Sponsor" group. Recommanded : either "Pro sponsor" or "Private sponsor".');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall Manage privilege? This will delete all privilege codes.');
 
@@ -86,7 +86,7 @@ class Sbu_privilege extends Module
             $this->registerHook('actionCustomerFormBuilderModifier') &&
             $this->registerHook('actionAfterCreateCustomerFormHandler') &&
             $this->registerHook('actionAfterUpdateCustomerFormHandler') &&
-  //          $this->registerHook('displayCustomerAccountForm') &&
+            //          $this->registerHook('displayCustomerAccountForm') &&
             $this->registerHook('actionObjectCustomerDeleteBefore');
     }
 
@@ -101,16 +101,16 @@ class Sbu_privilege extends Module
         return parent::uninstall();
     }
 
-//    public function hookdisplayCustomerAccountForm($params)
-//    {
-        //echo "AdditionalCustomerFormFields - BURLET";
-        //$a="displayCustomerAccountForm - BURLET - ";
-        //$a=$a.print_r($params,true);
-        //error_log($a);
-        /*echo "<pre>";
+    //    public function hookdisplayCustomerAccountForm($params)
+    //    {
+    //echo "AdditionalCustomerFormFields - BURLET";
+    //$a="displayCustomerAccountForm - BURLET - ";
+    //$a=$a.print_r($params,true);
+    //error_log($a);
+    /*echo "<pre>";
         print_r($params);
         echo "</pre>";*/
-//    }
+    //    }
 
     /**
      * Add additionnel field (privilege_code) in customer registration form in FO and in my account>>my information in FO
@@ -127,10 +127,10 @@ class Sbu_privilege extends Module
         echo "</pre>";*/
         return [
             (new FormField)
-            ->setName('private_sponsor')
-            ->setType('checkbox')
-            //->setRequired(true) Décommenter pour rendre obligatoire
-            ->setLabel($this->l('Sign up to become a private sponsor (I certify I\'m 18 years old or above)')),
+                ->setName('private_sponsor')
+                ->setType('checkbox')
+                //->setRequired(true) Décommenter pour rendre obligatoire
+                ->setLabel($this->l('Sign up to become a private sponsor (I certify I\'m 18 years old or above)')),
             (new FormField)
                 ->setName('privilege_code')
                 ->setType('text')
@@ -165,8 +165,9 @@ class Sbu_privilege extends Module
      */
     public function writeModuleValues(int $customerId)
     {
-        //error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code'));
+        //error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code')." - ".Tools::getValue('private_sponsor'));
         $PrivilegeCodeValue = Tools::getValue('privilege_code');
+        $PrivateSponsorValue = Tools::getValue('private_sponsor');
 
         /*
         $query = 'UPDATE `'._DB_PREFIX_.'sbu_privilege` priv '
@@ -201,11 +202,12 @@ class Sbu_privilege extends Module
             $privilegeCode = $this->createPrivilegeCode($customerId);
         }
         $privilegeCode->privilege_code = $PrivilegeCodeValue;
-        //error_log("privilegeCode = ".print_r($privilegeCode,true));
+        $privilegeCode->private_sponsor = $PrivateSponsorValue;
+        //        error_log("privilegeCode = ".print_r($privilegeCode,true));
 
         try {
             if (false === $privilegeCode->update()) {
-                $msg=$this->l('Failed to change privilege code with id');
+                $msg = $this->l('Failed to change privilege code with id');
                 throw new CannotUpdatePrivilegeCodeValueException(
                     sprintf('%s %s', $msg, $privilegeCode->id)
                 );
@@ -229,7 +231,7 @@ class Sbu_privilege extends Module
         //$a=$a.print_r($definition->getColumns(),true);
         //error_log($a);
 
-        // Add column
+        // Add columns
         $ColumnPrivilegeCode = new DataColumn('privilege_code');
         $ColumnPrivilegeCode->setName($this->l('Privilege Code'));
         $ColumnPrivilegeCode->setOptions([
@@ -238,12 +240,32 @@ class Sbu_privilege extends Module
         $columns = $definition->getColumns();
         $columns->addAfter('company', $ColumnPrivilegeCode);
 
-        // Add filter
+        $ColumnPrivateSponsor = new DataColumn('private_sponsor');
+        $ColumnPrivateSponsor->setName($this->l('Private Sponsor'));
+        $ColumnPrivateSponsor->setOptions([
+            'field' => 'private_sponsor',
+        ]);
+        $columns = $definition->getColumns();
+        $columns->addAfter('privilege_code', $ColumnPrivateSponsor);
+
+        // Add filters
         $filterPrivilegeCode = new Filter('privilege_code', TextType::class);
         $filterPrivilegeCode->setAssociatedColumn('privilege_code');
+        $filterPrivilegeCode->setTypeOptions([
+            'required' => false,
+        ]);
         /** @var FilterCollectionInterface $filters */
         $filters = $definition->getFilters();
         $filters->add($filterPrivilegeCode);
+
+        $filterPrivateSponsor = new Filter('private_sponsor', TextType::class);
+        $filterPrivateSponsor->setAssociatedColumn('private_sponsor');
+        $filterPrivateSponsor->setTypeOptions([
+            'required' => false,
+        ]);
+        /** @var FilterCollectionInterface $filters */
+        $filters = $definition->getFilters();
+        $filters->add($filterPrivateSponsor);
     }
 
     /**
@@ -259,7 +281,7 @@ class Sbu_privilege extends Module
         /** @var QueryBuilder $searchQueryBuilder */
         $searchQueryBuilder = $params['search_query_builder'];
 
-        $searchQueryBuilder->addSelect('priv.`privilege_code` AS `privilege_code`');
+        $searchQueryBuilder->addSelect('priv.`privilege_code` AS `privilege_code`')->addSelect('priv.`private_sponsor` AS `private_sponsor`');
         //->from(_DB_PREFIX_.'customer');
         $searchQueryBuilder->leftJoin(
             'c',
@@ -291,7 +313,7 @@ class Sbu_privilege extends Module
         foreach ($filters as $filterName => $filterValue) {
             if ('privilege_code' === $filterName) {
                 $searchQueryBuilder->andWhere('priv.`privilege_code` LIKE :param_privilege_code');
-                $searchQueryBuilder->setParameter('param_privilege_code', "%".$filterValue."%");
+                $searchQueryBuilder->setParameter('param_privilege_code', "%" . $filterValue . "%");
                 //if (isset($strictComparisonFilters[$filterName])) {
                 //    $alias = $strictComparisonFilters[$filterName];
                 //    $searchQueryBuilder->andWhere("$alias LIKE :$filterName");
@@ -446,7 +468,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
             try {
                 if (false === $privilegeCode->delete()) {
-                    $msg=$this->l('Failed to change privilege code with id');
+                    $msg = $this->l('Failed to change privilege code with id');
                     throw new CannotDeletePrivilegeCodeValueException(
                         sprintf('%s %s', $msg, $privilegeCode->id)
                     );
@@ -482,7 +504,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
         try {
             if (false === $privilegeCode->update()) {
-                $msg=$this->l('Failed to change privilege code with id');
+                $msg = $this->l('Failed to change privilege code with id');
                 throw new CannotUpdatePrivilegeCodeValueException(
                     sprintf('%s %s', $msg, $privilegeCode->id)
                 );
@@ -503,15 +525,16 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
      *
      * @throws CannotCreatePrivilegeCodeException
      */
-    protected function createPrivilegeCode(int $customerId, string $privilege_code = "")
+    protected function createPrivilegeCode(int $customerId, string $privilege_code = "", int $private_sponsor = 0)
     {
         try {
             $privilegeCode = new PrivilegeCode();
             $privilegeCode->id_customer = $customerId;
             $privilegeCode->privilege_code = $privilege_code;
+            $privilegeCode->private_sponsor = $private_sponsor;
 
             if (false === $privilegeCode->save()) {
-                $msg=$this->l('An error occurred when creating privilegeCode with customer id');
+                $msg = $this->l('An error occurred when creating privilegeCode with customer id');
                 throw new CannotCreatePrivilegeCodeException(
                     sprintf(
                         '%s %s',
@@ -521,8 +544,8 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
                 );
             }
         } catch (PrestaShopException $exception) {
-                $msg=$this->l('An error occurred when creating privilegeCode with customer id');
-                throw new CannotCreatePrivilegeCodeException(
+            $msg = $this->l('An error occurred when creating privilegeCode with customer id');
+            throw new CannotCreatePrivilegeCodeException(
                 sprintf(
                     '%s %s',
                     $msg,

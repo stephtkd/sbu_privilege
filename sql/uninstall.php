@@ -29,13 +29,23 @@
  * Maybe the merchant will just try to reset the module
  * but does not want to loose all of the data associated to the module.
  */
+
+error_log("Suppression des tables ...");
+
 $sql = array();
 
 // Je ne joue pas la requête de suppression de la colonne pour éviter les erreurs. Il faudra la désinstaller manuellement
 $sql[] = "DROP TABLE IF EXISTS `" . _DB_PREFIX_ . "sbu_privilege_code`;";
 
 foreach ($sql as $query) {
+    error_log("executing query " . $query);
     if (Db::getInstance()->execute($query) == false) {
+        error_log("display error = " . Db::getInstance()->displayError());
+        error_log("get msg = " . Db::getInstance()->getMsgError());
+        error_log("query ko");
         return false;
     }
+    error_log("query ok");
 }
+
+error_log("Suppression des tables OK");

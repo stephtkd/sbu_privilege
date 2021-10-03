@@ -8,7 +8,7 @@ Les clients s'inscrivent avec un code privilège qui correspond au code d'un par
 Le parrain doit être placé (manuellement) dans le groupe `Parrain pro` pour un professionnel, après validation de son identité.  
 Le parrain doit être placé (manuellement) dans le groupe `Parrain particulier` pour un particulier, après validation de son identité.  
 Le client privilégié doit être placé (manuellement) dans le groupe `Client privilégié`, après vérification de son code privilège.  
-Le client peuvt aussi être un professionnel. Dans ce cas, il doit être placé (manuellement) dans le groupe `Professionnel privilégié`, après vérification de son code privilège.  
+Le client peut aussi être un professionnel. Dans ce cas, il doit être placé (manuellement) dans le groupe `Professionnel privilégié`, après vérification de son code privilège.  
 Il faut indiquer dans la configuration du module quel group joue le rôle du groupe `Parrains Pro` et quel groupe joue le rôle de `Parrain particulier`  
 
 ## versions PrestaShop Supportées ##
@@ -41,6 +41,7 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 ## Historique des versions ##
 ### v 1.2.0  ###
 - Gestion de la suppression du customer, on efface alors le privilege_code
+- Possibilité de s'inscrire en tant que parrain particulier
 
 ### v 1.1.0  ###
 - Modification d'architecture. Je n'utilise plus le champs code_privilege dans la table customer, mais je crée une nouvelle table exprès pour ça (pour éviter de modifier la table customer)

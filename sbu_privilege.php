@@ -26,6 +26,8 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+ini_set("error_log", "./php-error.log");
+
 //use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\SubmitBulkAction;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PrestaShop\Module\SbuPrivilegeCode\Entity\PrivilegeCode;
@@ -45,7 +47,7 @@ class Sbu_privilege extends Module
     {
         $this->name = 'sbu_privilege';
         $this->tab = 'others';
-        $this->version = '1.2.0';
+        $this->version = '1.2.1';
         $this->author = 'Stéphane Burlet';
         $this->need_instance = 0;
 
@@ -165,9 +167,10 @@ class Sbu_privilege extends Module
      */
     public function writeModuleValues(int $customerId)
     {
-        //error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code')." - ".Tools::getValue('private_sponsor'));
-        $PrivilegeCodeValue = Tools::getValue('privilege_code');
-        $PrivateSponsorValue = Tools::getValue('private_sponsor');
+        error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code')." - ".Tools::getValue('private_sponsor'));
+        // ATTENTION : getValue marche dans le FO mais pas dans le BO (ex : quand on modifie un customer)
+        $PrivilegeCodeValue = trim(Tools::getValue('privilege_code'));
+        $PrivateSponsorValue = trim(Tools::getValue('private_sponsor'));
 
         /*
         $query = 'UPDATE `'._DB_PREFIX_.'sbu_privilege` priv '
@@ -191,33 +194,129 @@ class Sbu_privilege extends Module
 
         //return (int) $queryBuilder->execute()->fetch(PDO::FETCH_COLUMN);
         //  return Db::getInstance()->executeS($sql);
-        //error_log("PrivilegeCodeId = ".$PrivilegeCodeId);
+        error_log("PrivilegeCodeId = ".$PrivilegeCodeId);
         //error_log("PrivilegeCodeValue = ".$PrivilegeCodeValue);
 
 
         $privilegeCode = new PrivilegeCode($PrivilegeCodeId);
         //error_log("privilegeCode = ".print_r($privilegeCode,true));
         if (0 >= $privilegeCode->id) {
-            //error_log("je crée un nouveau privilege_code");
-            $privilegeCode = $this->createPrivilegeCode($customerId);
+            error_log("je crée un nouveau privilege_code : id = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
+            $privilegeCode = $this->createPrivilegeCode($customerId,$PrivilegeCodeValue,$PrivateSponsorValue);
         }
-        $privilegeCode->privilege_code = $PrivilegeCodeValue;
-        $privilegeCode->private_sponsor = $PrivateSponsorValue;
-        //        error_log("privilegeCode = ".print_r($privilegeCode,true));
+        else {
+            error_log("modification d'un privilege_code existant : id = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
+            $privilegeCode->privilege_code = $PrivilegeCodeValue;
+            $privilegeCode->private_sponsor = $PrivateSponsorValue;
+            //        error_log("privilegeCode = ".print_r($privilegeCode,true));
 
-        try {
-            if (false === $privilegeCode->update()) {
-                $msg = $this->l('Failed to change privilege code with id');
+            try {
+                if (false === $privilegeCode->update()) {
+                    $msg = $this->l('Failed to change privilege code with id');
+                    throw new CannotUpdatePrivilegeCodeValueException(
+                        sprintf('%s %s', $msg, $privilegeCode->id)
+                    );
+                }
+            } catch (PrestaShopException $exception) {
                 throw new CannotUpdatePrivilegeCodeValueException(
-                    sprintf('%s %s', $msg, $privilegeCode->id)
+                    $this->l('An unexpected error occurred when updating privilege code')
                 );
             }
-        } catch (PrestaShopException $exception) {
-            throw new CannotUpdatePrivilegeCodeValueException(
-                $this->l('An unexpected error occurred when updating privilege code')
-            );
         }
+
+        $this->affectPrivilegeGroup($customerId,$PrivilegeCodeValue);
     }
+
+    /**
+     * Function to assign the correct group according to the privilege code
+     * if the privilege-code is known :
+     *      - affect to group "client privilégié" (id 5) if no SIREN is given (private customer)
+     *      - affect to group "professionnel privilégié" (id 4) if SIREN or company name is given (professionnal customer)
+     * @param int $customerId
+     * @param string $PrivilegeCodeValue
+     */
+    public function affectPrivilegeGroup( int $customerId, string $PrivilegeCodeValue) 
+    {
+        $sql = new DbQuery();
+        //SELECT
+        //  pc.privilege_code,
+        //  pc.id_customer,
+        //  cg.id_group
+        //FROM
+        //  ps_sbu_privilege_code pc,
+        //  ps_customer cu,
+        //  ps_customer_group cg
+        //where
+        //  pc.privilege_code = "TUTU"
+        //  and pc.id_customer != 31
+        //  and pc.id_customer = cu.id_customer
+        //  and cu.id_customer = cg.id_customer
+        //  and cg.id_group in (6,7);
+        $sql->select('CONCAT(cu.firstname," ",cu.lastname) as nom')
+            ->from('sbu_privilege_code', 'pc')
+            ->from('customer', 'cu')
+            ->from('customer_group', 'cg')
+            ->where('pc.privilege_code = "' . pSQL($PrivilegeCodeValue) .'"')
+            ->where('pc.id_customer != ' . pSQL($customerId))
+            ->where('pc.id_customer = cu.id_customer')
+            ->where('cu.id_customer = cg.id_customer')
+            ->where('cg.id_group in (6,7)');         //6,7 représentent les id des groupes des parrains (affiliés ou responsables des ventes)
+
+        //$PrivilegeCodeId=Db::getInstance()->executeS($sql);
+        $sponsors = Db::getInstance()->executeS($sql);
+        if (sizeof($sponsors) != 0)
+        {
+            // On a un parrain
+            $listeSponsors="";
+            $i=0;
+            foreach($sponsors as $sponsor)
+            {
+                if ($i!=0)
+                {
+                    $listeSponsors.=", ";
+                }
+                $listeSponsors.=$sponsor["nom"];
+                $i++;
+            }
+            error_log("Parrain trouvé : $listeSponsors");
+            // Il faut maintenant déterminer si le client est pro ou particulier. Pour ça je regarde son code SIRET ou company
+            $sql = new DbQuery();
+            $sql->select('`company`')
+            ->select('`siret`')
+            ->from('customer')
+            ->where('id_customer = ' . pSQL($customerId));
+            $companies = Db::getInstance()->executeS($sql);
+            //error_log(print_r($companies,true));
+            $company=$companies[0]["company"];
+            $siret=$companies[0]["siret"];
+            if ( $company == "" && $siret == "" )
+            {
+                // Il faut alors lui affecter le groupe_id 5 (Client privilégié)
+                $sql = \Db::getInstance();
+                $sql->insert('customer_group', [ 
+                    'id_customer' => (int) pSQL($customerId), 
+                    'id_group' => 5
+                ],
+                true,
+                true,
+                Db::INSERT_IGNORE);
+                error_log("Ajout du groupe d'id 5 pour le client d'id $customerId");
+            }
+            else
+            {
+                error_log("Le client est un professionnel. Je ne fais rien pour le moment.");
+            }
+        }
+        else
+        {
+            error_log("Aucun parrain trouvé avec ce code privilege ($PrivilegeCodeValue)");
+        }
+
+//        error_log("Je trouve $numRows privilege(s) code identiques au mien ($PrivilegeCodeValue)");
+
+    }
+
+
     /**
      * Hook allows to modify Customers grid definition.
      * Add column privilege_code in admin customers grid in BO
@@ -520,6 +619,8 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
      * Creates a PrivilegeCode.
      *
      * @param int $customerId
+     * @param string $privilege_code
+     * @param int $private_sponsor
      *
      * @return PrivilegeCode
      *
@@ -709,5 +810,12 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
     {
         $this->context->controller->addJS($this->_path . '/views/js/front.js');
         $this->context->controller->addCSS($this->_path . '/views/css/front.css');
+    }
+
+    public function debug($txt)
+    {
+        echo "<pre>";
+        print_r($txt);
+        echo "</pre>";
     }
 }

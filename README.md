@@ -35,10 +35,13 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 - permettre au commercial de suivre, depuis son espace client, la liste des ventes de ses clients et de connaître le montant de ses commissions
 - Déplacer le champ privilege code dans le formulaire d'inscription dans le FO (pas possible)
 - Lors de la désinstallation, il faudrait faire un export des code_privileges pour éviter les erreurs de réinstallation (persone ne le fait dans aucun module)
-- ajouter la possibilité de s'inscrire en tant que parrain particulier
+- Affectation automatique du groupe 'Professionnel Privilégié' (groupe id 4) lorsqu'un professionnel crée un compte en renseignant son SIREN (et son code privilège)
 
 
 ## Historique des versions ##
+### v 1.2.1  ###
+- Affectation automatique du groupe 'Client Privilégié' (groupe id 5) lorsqu'un client particulier crée un compte en renseignant son code privilège et que le code privilège est bien valide
+
 ### v 1.2.0  ###
 - Gestion de la suppression du customer, on efface alors le privilege_code
 - Possibilité de s'inscrire en tant que parrain particulier

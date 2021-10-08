@@ -230,7 +230,8 @@ class Sbu_privilege extends Module
     /**
      * Function to assign the correct group according to the privilege code
      * if the privilege-code is known :
-     *      - affect to group "client privilégié" if no SIREN is given (private customer)
+     *      - affect to group "client privilégié" (id 5) if no SIREN is given (private customer)
+     *      - affect to group "professionnel privilégié" (id 4) if SIREN or company name is given (professionnal customer)
      * @param int $customerId
      * @param string $PrivilegeCodeValue
      */
@@ -246,7 +247,7 @@ class Sbu_privilege extends Module
         //  ps_customer cu,
         //  ps_customer_group cg
         //where
-        //  pc.privilege_code = "TUTU2"
+        //  pc.privilege_code = "TUTU"
         //  and pc.id_customer != 31
         //  and pc.id_customer = cu.id_customer
         //  and cu.id_customer = cg.id_customer
@@ -259,12 +260,13 @@ class Sbu_privilege extends Module
             ->where('pc.id_customer != ' . pSQL($customerId))
             ->where('pc.id_customer = cu.id_customer')
             ->where('cu.id_customer = cg.id_customer');
-            //->where('cg.id_group in (6,7)');         //6,7 représentent les id des groupes des parrains (affiliés ou responsables des ventes)
+            ->where('cg.id_group in (6,7)');         //6,7 représentent les id des groupes des parrains (affiliés ou responsables des ventes)
 
         //$PrivilegeCodeId=Db::getInstance()->executeS($sql);
         $sponsors = Db::getInstance()->executeS($sql);
         if (sizeof($sponsors) != 0)
         {
+            // On a un parrain
             $listeSponsors="";
             $i=0;
             foreach($sponsors as $sponsor)

@@ -169,8 +169,8 @@ class Sbu_privilege extends Module
     {
         error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code')." - ".Tools::getValue('private_sponsor'));
         // ATTENTION : getValue marche dans le FO mais pas dans le BO (ex : quand on modifie un customer)
-        $PrivilegeCodeValue = Tools::getValue('privilege_code');
-        $PrivateSponsorValue = Tools::getValue('private_sponsor');
+        $PrivilegeCodeValue = trim(Tools::getValue('privilege_code'));
+        $PrivateSponsorValue = trim(Tools::getValue('private_sponsor'));
 
         /*
         $query = 'UPDATE `'._DB_PREFIX_.'sbu_privilege` priv '

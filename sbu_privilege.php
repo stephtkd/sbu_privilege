@@ -259,7 +259,7 @@ class Sbu_privilege extends Module
             ->where('pc.privilege_code = "' . pSQL($PrivilegeCodeValue) .'"')
             ->where('pc.id_customer != ' . pSQL($customerId))
             ->where('pc.id_customer = cu.id_customer')
-            ->where('cu.id_customer = cg.id_customer');
+            ->where('cu.id_customer = cg.id_customer')
             ->where('cg.id_group in (6,7)');         //6,7 représentent les id des groupes des parrains (affiliés ou responsables des ventes)
 
         //$PrivilegeCodeId=Db::getInstance()->executeS($sql);

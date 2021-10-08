@@ -26,7 +26,6 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
-//ini_set("log_errors", 1);
 ini_set("error_log", "./php-error.log");
 
 //use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\SubmitBulkAction;
@@ -169,7 +168,6 @@ class Sbu_privilege extends Module
     public function writeModuleValues(int $customerId)
     {
         error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code')." - ".Tools::getValue('private_sponsor'));
-        error_log("test",3,"./my_error.log");
         // ATTENTION : getValue marche dans le FO mais pas dans le BO (ex : quand on modifie un customer)
         $PrivilegeCodeValue = Tools::getValue('privilege_code');
         $PrivateSponsorValue = Tools::getValue('private_sponsor');

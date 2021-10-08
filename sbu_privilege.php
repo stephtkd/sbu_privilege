@@ -26,6 +26,9 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+//ini_set("log_errors", 1);
+ini_set("error_log", "./php-error.log");
+
 //use PrestaShop\PrestaShop\Core\Grid\Action\Bulk\Type\SubmitBulkAction;
 use Doctrine\DBAL\Query\QueryBuilder;
 use PrestaShop\Module\SbuPrivilegeCode\Entity\PrivilegeCode;
@@ -35,7 +38,6 @@ use PrestaShop\Module\SbuPrivilegeCode\Exception\CannotUpdatePrivilegeCodeValueE
 use PrestaShop\PrestaShop\Core\Grid\Column\Type\DataColumn;
 use PrestaShop\PrestaShop\Core\Grid\Filter\Filter;
 use PrestaShop\PrestaShop\Core\Grid\Filter\FilterCollectionInterface;
-use Symfony\Component\Console\Helper\Dumper;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class Sbu_privilege extends Module
@@ -167,7 +169,7 @@ class Sbu_privilege extends Module
     public function writeModuleValues(int $customerId)
     {
         error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code')." - ".Tools::getValue('private_sponsor'));
-
+        error_log("test",3,"./my_error.log");
         // ATTENTION : getValue marche dans le FO mais pas dans le BO (ex : quand on modifie un customer)
         $PrivilegeCodeValue = Tools::getValue('privilege_code');
         $PrivateSponsorValue = Tools::getValue('private_sponsor');

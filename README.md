@@ -39,6 +39,9 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 
 
 ## Historique des versions ##
+### v 1.2.2  ###
+- Correction du bug qui ne permettait plus de modifier un client
+
 ### v 1.2.1  ###
 - Affectation automatique du groupe 'Client Privilégié' (groupe id 5) lorsqu'un client particulier crée un compte en renseignant son code privilège et que le code privilège est bien valide
 

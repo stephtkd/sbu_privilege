@@ -47,7 +47,7 @@ class Sbu_privilege extends Module
     {
         $this->name = 'sbu_privilege';
         $this->tab = 'others';
-        $this->version = '1.2.1';
+        $this->version = '1.2.2';
         $this->author = 'Stéphane Burlet';
         $this->need_instance = 0;
 
@@ -167,10 +167,10 @@ class Sbu_privilege extends Module
      */
     public function writeModuleValues(int $customerId)
     {
-        error_log("writeModuleValues - $customerId - ".Tools::getValue('privilege_code')." - ".Tools::getValue('private_sponsor'));
+        error_log("writeModuleValues - customerId=$customerId - privilege_code=".Tools::getValue('privilege_code')." - private_sponsor=".Tools::getValue('private_sponsor'));
         // ATTENTION : getValue marche dans le FO mais pas dans le BO (ex : quand on modifie un customer)
         $PrivilegeCodeValue = trim(Tools::getValue('privilege_code'));
-        $PrivateSponsorValue = trim(Tools::getValue('private_sponsor'));
+        $PrivateSponsorValue = (int)trim(Tools::getValue('private_sponsor'));
 
         /*
         $query = 'UPDATE `'._DB_PREFIX_.'sbu_privilege` priv '
@@ -200,12 +200,13 @@ class Sbu_privilege extends Module
 
         $privilegeCode = new PrivilegeCode($PrivilegeCodeId);
         //error_log("privilegeCode = ".print_r($privilegeCode,true));
+        // En testant $privilegeCode->id, ça marche que je vienne du FO ou du BO (car Tools::getValue ne marche pas en venant du BO)
         if (0 >= $privilegeCode->id) {
-            error_log("je crée un nouveau privilege_code : id = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
+            error_log("je crée un nouveau privilege_code : customerId = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
             $privilegeCode = $this->createPrivilegeCode($customerId,$PrivilegeCodeValue,$PrivateSponsorValue);
         }
         else {
-            error_log("modification d'un privilege_code existant : id = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
+            error_log("modification d'un privilege_code existant : customerId = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
             $privilegeCode->privilege_code = $PrivilegeCodeValue;
             $privilegeCode->private_sponsor = $PrivateSponsorValue;
             //        error_log("privilegeCode = ".print_r($privilegeCode,true));
@@ -237,6 +238,8 @@ class Sbu_privilege extends Module
      */
     public function affectPrivilegeGroup( int $customerId, string $PrivilegeCodeValue) 
     {
+        if (empty($PrivilegeCodeValue)) return true;
+
         $sql = new DbQuery();
         //SELECT
         //  pc.privilege_code,

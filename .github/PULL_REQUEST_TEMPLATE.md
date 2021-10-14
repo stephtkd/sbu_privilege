@@ -1,7 +1,5 @@
 <!-----------------------------------------------------------------------------
 Thank you for contributing to the PrestaShop project! 
-MERCI
-COUCOU
 Please take the time to edit the "Answers" rows below with the necessary information.
 
 Check out our contribution guidelines to find out how to complete it:

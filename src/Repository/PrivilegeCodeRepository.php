@@ -58,7 +58,7 @@ class PrivilegeCodeRepository
     }
 
     /**
-     * Gets allowed to review status by customer.
+     * Gets privilege code by customer.
      *
      * @param int $customerId
      *
@@ -77,5 +77,27 @@ class PrivilegeCodeRepository
         $queryBuilder->setParameter('customer_id', $customerId);
 
         return (string) $queryBuilder->execute()->fetch(PDO::FETCH_COLUMN);
+    }
+
+    /**
+     * Gets sales manager by customer.
+     *
+     * @param int $customerId
+     *
+     * @return int
+     */
+    public function getSalesManager($customerId)
+    {
+        $queryBuilder = $this->connection->createQueryBuilder();
+
+        $queryBuilder
+            ->select('`sales_manager`')
+            ->from($this->dbPrefix . 'sbu_privilege_code')
+            ->where('`id_customer` = :customer_id')
+        ;
+
+        $queryBuilder->setParameter('customer_id', $customerId);
+
+        return (int) $queryBuilder->execute()->fetch(PDO::FETCH_COLUMN);
     }
 }

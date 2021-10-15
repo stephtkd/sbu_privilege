@@ -33,7 +33,7 @@ $sql[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'sbu_privilege_code` (
     `id_privilege_code` int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
     `id_customer` INT(10) UNSIGNED NOT NULL,
     `privilege_code` VARCHAR(50) NULL DEFAULT NULL,
-    `private_sponsor` TINYINT NOT NULL DEFAULT 0,
+    `sales_manager` TINYINT NOT NULL DEFAULT 0,
     PRIMARY KEY  (`id_privilege_code`)
 ) ENGINE=' . _MYSQL_ENGINE_ . ' DEFAULT CHARSET=utf8;';
 

@@ -47,7 +47,7 @@ class Sbu_privilege extends Module
     {
         $this->name = 'sbu_privilege';
         $this->tab = 'others';
-        $this->version = '1.2.2';
+        $this->version = '1.2.3';
         $this->author = 'Stéphane Burlet';
         $this->need_instance = 0;
 
@@ -59,11 +59,14 @@ class Sbu_privilege extends Module
         parent::__construct();
 
         $this->displayName = $this->l('Manage privileges');
-        $this->description = $this->l('Manages privilege codes. Every commercial will receive a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code. This privilege code allows the commercial to receive commissions on every sale from its customers. The customer should be placed into a group "Privileged Customer" and cart rules should be affected to this group. If the customer is a professionel, then he should be placed into a group "Privileged professional". The configuration determines which group will be the "Sponsor" group. Recommanded : either "Pro sponsor" or "Private sponsor".');
+        $this->description = $this->l('Manages privilege codes. Every commercial will receive a privilege code. They give this code to their customers. The customers, when they sign in, will be asked for this privilege code. This privilege code allows the commercial to receive commissions on every sale from its customers. The customer should be placed into a group "Privileged Customer" and cart rules should be affected to this group. If the customer is a professionel, then he should be placed into a group "Privileged professional". The configuration determines which group will be the "Sponsor" group. Recommanded : "Sales Manager".');
 
         $this->confirmUninstall = $this->l('Are you sure you want to uninstall Manage privilege? This will delete all privilege codes.');
 
         $this->ps_versions_compliancy = array('min' => '1.7.6.0', 'max' => _PS_VERSION_);
+
+        $this->is_module_setup();
+        return true;
     }
 
 
@@ -73,9 +76,9 @@ class Sbu_privilege extends Module
      */
     public function install()
     {
-        error_log("install " . $this->name . " : " . $this->version);
+        error_log($this->name." - install " . $this->name . " : " . $this->version);
 
-        Configuration::updateValue('SBU_PRIVILEGE_COMMERCIAL_GROUP_ID', null);
+        Configuration::updateValue('SBU_PRIVILEGE_SALES_MANAGER_GROUP_ID', null);
 
         include(dirname(__FILE__) . '/sql/install.php');
 
@@ -94,9 +97,9 @@ class Sbu_privilege extends Module
 
     public function uninstall()
     {
-        error_log("uninstall " . $this->name . " : " . $this->version);
+        error_log($this->name." - uninstall " . $this->name . " : " . $this->version);
 
-        Configuration::deleteByName('SBU_PRIVILEGE_COMMERCIAL_GROUP_ID');
+        Configuration::deleteByName('SBU_PRIVILEGE_SALES_MANAGER_GROUP_ID');
 
         include(dirname(__FILE__) . '/sql/uninstall.php');
 
@@ -114,6 +117,23 @@ class Sbu_privilege extends Module
         echo "</pre>";*/
     //    }
 
+        /**
+     * check if the module is set up or not
+     *
+     * @return boolean
+     */
+    private function is_module_setup()
+    {
+        $SALES_MANAGER_GROUP_ID=Configuration::get('SBU_PRIVILEGE_SALES_MANAGER_GROUP_ID');
+        if ( empty($SALES_MANAGER_GROUP_ID))
+        {
+            error_log("Attention : Module privilege non configuré !");
+            return false;
+        }
+        else
+            return true;
+    }
+
     /**
      * Add additionnel field (privilege_code) in customer registration form in FO and in my account>>my information in FO
      * @param type $params
@@ -129,10 +149,10 @@ class Sbu_privilege extends Module
         echo "</pre>";*/
         return [
             (new FormField)
-                ->setName('private_sponsor')
+                ->setName('sales_manager')
                 ->setType('checkbox')
                 //->setRequired(true) Décommenter pour rendre obligatoire
-                ->setLabel($this->l('Sign up to become a private sponsor (I certify I\'m 18 years old or above)')),
+                ->setLabel($this->l('Sign up to become a sales manager (I certify I\'m 18 years old or above)')),
             (new FormField)
                 ->setName('privilege_code')
                 ->setType('text')
@@ -142,35 +162,61 @@ class Sbu_privilege extends Module
     }
 
     /**
-     * Customer update in FO
+     * Customer update in FO or BO
+     * params['object'] de la forme :
+     * Customer Object
+     *   (
+     *       [id] => 33
+     *       [id_shop] => 1
+     *       [id_shop_group] => 1
+     *       [secure_key] => e616d3582f20b2885a9fa063a684c1c6
+     *       [note] => 
+     *       [id_gender] => 1
+     *       [id_default_group] => 3
+     *       [id_lang] => 1
+     *       [lastname] => burl
+     *       [firstname] => steph
+     *       [birthday] => 0000-00-00
+     *       [email] => stephtkd@yahoo.frr
+     *       [newsletter] => 0
+     *       [ip_registration_newsletter] => 
+     *       [newsletter_date_add] => 0000-00-00 00:00:00
+     *       [optin] => 
+     *       [website] => 
+     *       [company] => 
+     *       [siret] => 
+     *       [ape] => 
      */
     public function hookactionObjectCustomerUpdateAfter($params)
     {
+        error_log($this->name." - hookactionObjectCustomerUpdateAfter : customerId=".$params['object']->id);
         $idCustomer = (int)$params['object']->id;
         $this->writeModuleValues($idCustomer);
     }
 
     /**
-     * Customer add in FO
+     * Customer add in FO or BO
      */
     public function hookactionObjectCustomerAddAfter($params)
     {
+        error_log($this->name." - hookactionObjectCustomerAddAfter : customerId=".$params['object']->id);
         $idCustomer = (int)$params['object']->id;
         $this->writeModuleValues($idCustomer);
     }
 
     /**
      * Mutualiser la fonction avec updateCustomerPrivilegeCode (pas possible)
+     * Appelée lors d'une modif dans le FO ou le BO
      *
      * @param integer $customerId
      * @return void
      */
     public function writeModuleValues(int $customerId)
     {
-        error_log("writeModuleValues - customerId=$customerId - privilege_code=".Tools::getValue('privilege_code')." - private_sponsor=".Tools::getValue('private_sponsor'));
+        error_log($this->name." - writeModuleValues - customerId=$customerId - privilege_code=".Tools::getValue('privilege_code')." - sales_manager=".Tools::getValue('sales_manager'));
         // ATTENTION : getValue marche dans le FO mais pas dans le BO (ex : quand on modifie un customer)
         $PrivilegeCodeValue = trim(Tools::getValue('privilege_code'));
-        $PrivateSponsorValue = (int)trim(Tools::getValue('private_sponsor'));
+        $SalesManagerValue = (int)trim(Tools::getValue('sales_manager'));
 
         /*
         $query = 'UPDATE `'._DB_PREFIX_.'sbu_privilege` priv '
@@ -194,22 +240,24 @@ class Sbu_privilege extends Module
 
         //return (int) $queryBuilder->execute()->fetch(PDO::FETCH_COLUMN);
         //  return Db::getInstance()->executeS($sql);
-        error_log("PrivilegeCodeId = ".$PrivilegeCodeId);
+//        error_log("PrivilegeCodeId = ".$PrivilegeCodeId);
+
         //error_log("PrivilegeCodeValue = ".$PrivilegeCodeValue);
 
 
         $privilegeCode = new PrivilegeCode($PrivilegeCodeId);
+        error_log("privilegeCode (id=".$privilegeCode->id.", privilege_code=".$privilegeCode->privilege_code.", sales_manager=".$privilegeCode->sales_manager.")");
         //error_log("privilegeCode = ".print_r($privilegeCode,true));
         // En testant $privilegeCode->id, ça marche que je vienne du FO ou du BO (car Tools::getValue ne marche pas en venant du BO)
         if (0 >= $privilegeCode->id) {
-            error_log("je crée un nouveau privilege_code : customerId = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
-            $privilegeCode = $this->createPrivilegeCode($customerId,$PrivilegeCodeValue,$PrivateSponsorValue);
+            error_log("je crée un nouveau privilege_code : customerId = $customerId; privilege-code = $PrivilegeCodeValue; Sales-manager = $SalesManagerValue");
+            $privilegeCode = $this->createPrivilegeCode($customerId,$PrivilegeCodeValue,$SalesManagerValue);
         }
         else {
-            error_log("modification d'un privilege_code existant : customerId = $customerId; privilege-code = $PrivilegeCodeValue; Private-sponsor = $PrivateSponsorValue");
+            error_log("modification d'un privilege_code existant : customerId = $customerId; privilege-code = $PrivilegeCodeValue; Sales-manager = $SalesManagerValue");
             $privilegeCode->privilege_code = $PrivilegeCodeValue;
-            $privilegeCode->private_sponsor = $PrivateSponsorValue;
-            //        error_log("privilegeCode = ".print_r($privilegeCode,true));
+            $privilegeCode->sales_manager = $SalesManagerValue;
+            error_log("privilegeCode (id=".$privilegeCode->id.", privilege_code=".$privilegeCode->privilege_code.", sales_manager=".$privilegeCode->sales_manager.")");
 
             try {
                 if (false === $privilegeCode->update()) {
@@ -238,7 +286,10 @@ class Sbu_privilege extends Module
      */
     public function affectPrivilegeGroup( int $customerId, string $PrivilegeCodeValue) 
     {
+        error_log($this->name." - affectPrivilegeGroup(customerId=$customerId, PrivilegeCodeValue=$PrivilegeCodeValue)");
+        if (! $this->is_module_setup()) return true;
         if (empty($PrivilegeCodeValue)) return true;
+        $SALES_MANAGER_GROUP_ID=(int)Configuration::get('SBU_PRIVILEGE_SALES_MANAGER_GROUP_ID', null);
 
         $sql = new DbQuery();
         //SELECT
@@ -263,7 +314,7 @@ class Sbu_privilege extends Module
             ->where('pc.id_customer != ' . pSQL($customerId))
             ->where('pc.id_customer = cu.id_customer')
             ->where('cu.id_customer = cg.id_customer')
-            ->where('cg.id_group in (6,7)');         //6,7 représentent les id des groupes des parrains (affiliés ou responsables des ventes)
+            ->where('cg.id_group in ('.pSQL($SALES_MANAGER_GROUP_ID).')');         //6 représente l'id des groupes des parrains (responsables des ventes)
 
         //$PrivilegeCodeId=Db::getInstance()->executeS($sql);
         $sponsors = Db::getInstance()->executeS($sql);
@@ -322,16 +373,14 @@ class Sbu_privilege extends Module
 
     /**
      * Hook allows to modify Customers grid definition.
-     * Add column privilege_code in admin customers grid in BO
+     * Add column privilege_code ans sales_manager in admin customers grid in BO
      */
     public function hookActionCustomerGridDefinitionModifier(array $params)
     {
-        //$a="hookActionCustomerGridDefinitionModifier - BURLET - ";
-        //echo "$a";
         /** @var GridDefinitionInterface $definition */
         $definition = $params['definition'];
         //$a=$a.print_r($definition->getColumns(),true);
-        //error_log($a);
+        error_log($this->name." - hookActionCustomerGridDefinitionModifier");
 
         // Add columns
         $ColumnPrivilegeCode = new DataColumn('privilege_code');
@@ -342,13 +391,13 @@ class Sbu_privilege extends Module
         $columns = $definition->getColumns();
         $columns->addAfter('company', $ColumnPrivilegeCode);
 
-        $ColumnPrivateSponsor = new DataColumn('private_sponsor');
-        $ColumnPrivateSponsor->setName($this->l('Private Sponsor'));
-        $ColumnPrivateSponsor->setOptions([
-            'field' => 'private_sponsor',
+        $ColumnSalesManager = new DataColumn('sales_manager');
+        $ColumnSalesManager->setName($this->l('Sales Manager'));
+        $ColumnSalesManager->setOptions([
+            'field' => 'sales_manager',
         ]);
         $columns = $definition->getColumns();
-        $columns->addAfter('privilege_code', $ColumnPrivateSponsor);
+        $columns->addAfter('privilege_code', $ColumnSalesManager);
 
         // Add filters
         $filterPrivilegeCode = new Filter('privilege_code', TextType::class);
@@ -360,30 +409,28 @@ class Sbu_privilege extends Module
         $filters = $definition->getFilters();
         $filters->add($filterPrivilegeCode);
 
-        $filterPrivateSponsor = new Filter('private_sponsor', TextType::class);
-        $filterPrivateSponsor->setAssociatedColumn('private_sponsor');
-        $filterPrivateSponsor->setTypeOptions([
+        $filterSalesManager = new Filter('sales_manager', TextType::class);
+        $filterSalesManager->setAssociatedColumn('sales_manager');
+        $filterSalesManager->setTypeOptions([
             'required' => false,
         ]);
         /** @var FilterCollectionInterface $filters */
         $filters = $definition->getFilters();
-        $filters->add($filterPrivateSponsor);
+        $filters->add($filterSalesManager);
     }
 
     /**
      * Hook allows to modify Customers query builder and add custom sql statements.
-     * Query column privilege_code in admin customers list in BO
+     * Query column privilege_code ans sales_manager in admin customers list in BO
      */
     public function hookActionCustomerGridQueryBuilderModifier(array $params)
     {
-        //$a="hookActionCustomerGridQueryBuilderModifier - BURLET - ";
-        //echo "$a";
-        //error_log($a);
+        error_log($this->name." - hookActionCustomerGridQueryBuilderModifier");
 
         /** @var QueryBuilder $searchQueryBuilder */
         $searchQueryBuilder = $params['search_query_builder'];
 
-        $searchQueryBuilder->addSelect('priv.`privilege_code` AS `privilege_code`')->addSelect('priv.`private_sponsor` AS `private_sponsor`');
+        $searchQueryBuilder->addSelect('priv.`privilege_code` AS `privilege_code`')->addSelect('priv.`sales_manager` AS `sales_manager`');
         //->from(_DB_PREFIX_.'customer');
         $searchQueryBuilder->leftJoin(
             'c',
@@ -391,25 +438,31 @@ class Sbu_privilege extends Module
             'priv',
             'priv.`id_customer` = c.`id_customer`'
         );
+        //error_log($searchQueryBuilder->getSQL());
 
-        $countQueryBuilder = $params['count_query_builder'];
+        /*$countQueryBuilder = $params['count_query_builder'];
         // So the pagination and the number of customers
         // retrieved will be right.
-        $countQueryBuilder->addSelect('priv.privilege_code');
+        $countQueryBuilder->addSelect('priv.privilege_code')->addSelect('priv.`sales_manager`');
         $countQueryBuilder->leftJoin(
             'c',
             '`' . _DB_PREFIX_ . 'sbu_privilege_code`',
             'priv',
             'priv.`id_customer` = c.`id_customer`'
         );
-
+        */
+        /* Gestion du tri */
         /** @var SearchCriteriaInterface $searchCriteria */
         $searchCriteria = $params['search_criteria'];
 
         if ('privilege_code' === $searchCriteria->getOrderBy()) {
             $searchQueryBuilder->orderBy('priv.`privilege_code`', $searchCriteria->getOrderWay());
         }
+        if ('sales_manager' === $searchCriteria->getOrderBy()) {
+            $searchQueryBuilder->orderBy('priv.`sales_manager`', $searchCriteria->getOrderWay());
+        }
 
+        /* Gestion des filtres */
         //        error_log(print_r($searchCriteria->getFilters(),true));
         $filters = $searchCriteria->getFilters();
         foreach ($filters as $filterName => $filterValue) {
@@ -422,23 +475,45 @@ class Sbu_privilege extends Module
                 //    $searchQueryBuilder->setParameter($filterName, '%'.$filterValue.'%');
                 //continue;
             }
+            if ('sales_manager' === $filterName) {
+                $searchQueryBuilder->andWhere('priv.`sales_manager` LIKE :param_sales_manager');
+                $searchQueryBuilder->setParameter('param_sales_manager', "%" . $filterValue . "%");
+            }
         }
     }
 
     /**
      * Hook allows to modify Customers form and add additional form fields as well as modify or add new data to the forms.
-     * Add column privilege_code in admin customers form in BO
+     * Add column privilege_code and sales_manager in admin customers form in BO
+     * Called when we edit a customer in BO ans after saving when editing a customer in BO (so called twice)
      *
+     * Array params
+     *  (
+     *      [0] => _ps_version
+     *      [1] => request
+     *      [2] => route
+     *      [3] => form_builder
+     *      [4] => data
+     *      [5] => id
+     *      [6] => cookie
+     *      [7] => cart
+     *      [8] => altern
+     *  )
+
      * @param array $params
      */
     public function hookActionCustomerFormBuilderModifier(array $params)
     {
-        //error_log($this->name." - hookActionCustomerFormBuilderModifier - BURLET");
+        error_log($this->name." - hookActionCustomerFormBuilderModifier");
         /** @var FormBuilderInterface $formBuilder */
         $formBuilder = $params['form_builder'];
 
         $formBuilder->add('privilege_code', TextType::class, [
             'label' => $this->l('Privilege Code'),
+            'required' => false,
+        ]);
+        $formBuilder->add('sales_manager', TextType::class, [
+            'label' => $this->l('Sales Manager'),
             'required' => false,
         ]);
 
@@ -448,29 +523,65 @@ class Sbu_privilege extends Module
             'required' => false,
         ]);*/
 
-        $result = "";
-        if (null !== $params['id']) {
-            $result = $this->get('ps_sbu_privilege.repository.privilege_code')->getPrivilegeCode((int) $params['id']);
-        }
-        $params['data']['privilege_code'] = $result;
+        $privilegeCodeValue = "";
+        $salesManagerValue = "";
 
+        if (null !== $params['id']) {
+            $privilegeCodeValue = $this->get('ps_sbu_privilege.repository.privilege_code')->getPrivilegeCode((int) $params['id']);
+            $salesManagerValue = $this->get('ps_sbu_privilege.repository.privilege_code')->getSalesManager((int) $params['id']);
+        }
+        $params['data']['privilege_code'] = $privilegeCodeValue;
+        $params['data']['sales_manager'] = $salesManagerValue;
+
+        //error_log('param[data] = '.print_r($params['data'],true));
         //$params['data']['privilege_code'] = "toto";
 
         $formBuilder->setData($params['data']);
     }
 
-
+/**
+ * Hook called after saving when editing a customer in BO
+ * params de la forme : Array
+    * (
+    *     [0] => _ps_version
+    *     [1] => request
+    *     [2] => route
+    *     [3] => id
+    *     [4] => form_data
+    *     [5] => cookie
+    *     [6] => cart
+    *     [7] => altern
+    * )
+ *
+ * @param array $params
+ * @return void
+ */
     public function hookActionAfterUpdateCustomerFormHandler(array $params)
     {
-        //$a="hookActionAfterUpdateCustomerFormHandler - BURLET - ";
-        // error_log($a);
+        error_log($this->name." - hookActionAfterUpdateCustomerFormHandler : ".print_r($params['route'],true));
         $this->updateCustomerPrivilegeCode($params);
     }
 
-    public function hookActionAfterCreateCustomerFormHandler(array $params)
+/**
+ * Hook called after saving when creating a customer in BO
+ * params de la forme : Array
+    * (
+    *     [0] => _ps_version
+    *     [1] => request
+    *     [2] => route
+    *     [3] => id
+    *     [4] => form_data
+    *     [5] => cookie
+    *     [6] => cart
+    *     [7] => altern
+    * )
+ *
+ * @param array $params
+ * @return void
+ */
+public function hookActionAfterCreateCustomerFormHandler(array $params)
     {
-        //$a="hookActionAfterCreateCustomerFormHandler - BURLET - ";
-        // error_log($a);
+        error_log($this->name." - hookActionAfterCreateCustomerFormHandler");
         $this->updateCustomerPrivilegeCode($params);
     }
 
@@ -485,8 +596,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
     public function hookActionObjectCustomerDeleteBefore(array $params)
     {
-        //$a = "hookActionObjectCustomerDeleteBefore - BURLET - ";
-        //error_log($a);
+        error_log($this->name." - hookActionObjectCustomerDeleteBefore");
         $this->deleteCustomerPrivilegeCode($params);
     }
 
@@ -562,7 +672,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
         /*
         $customerFormData = $params['form_data'];
         $PrivilegeCodeValue = (string) $customerFormData['privilege_code'];
-*/
+        */
         $PrivilegeCodeId = $this->get('ps_sbu_privilege.repository.privilege_code')->findIdByCustomer($customerId);
         //        error_log("delete customerId = $customerId - privilegecodeId = " . print_r($PrivilegeCodeId, true));
         if ($PrivilegeCodeId != 0) {
@@ -585,24 +695,42 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
 
 
     /**
+     * Called by hook hookActionAfterUpdateCustomerFormHandler or hookActionAfterCreateCustomerFormHandler (after editing a customer in BO)
+     * params de la forme : Array
+    * (
+    *     [0] => _ps_version
+    *     [1] => request
+    *     [2] => route
+    *     [3] => id
+    *     [4] => form_data
+    *     [5] => cookie
+    *     [6] => cart
+    *     [7] => altern
+    * )
      * @param array $params
      *
      * @throws \PrestaShop\PrestaShop\Core\Module\Exception\ModuleErrorException
      */
     private function updateCustomerPrivilegeCode(array $params)
     {
+        error_log($this->name." - updateCustomerPrivilegeCode avec param[id] = ".$params['id']);
         $customerId = $params['id'];
         /** @var array $customerFormData */
         $customerFormData = $params['form_data'];
         $PrivilegeCodeValue = (string) $customerFormData['privilege_code'];
-
+        $SalesManagerValue = (int) $customerFormData['sales_manager'];
+        
         $PrivilegeCodeId = $this->get('ps_sbu_privilege.repository.privilege_code')->findIdByCustomer($customerId);
 
         $privilegeCode = new PrivilegeCode($PrivilegeCodeId);
+        error_log("privilegeCode (id=".$privilegeCode->id.", privilege_code=".$privilegeCode->privilege_code.", sales_manager=".$privilegeCode->sales_manager.")");
+
         if (0 >= $privilegeCode->id) {
             $privilegeCode = $this->createPrivilegeCode($customerId);
         }
         $privilegeCode->privilege_code = $PrivilegeCodeValue;
+        $privilegeCode->sales_manager = $SalesManagerValue;
+        error_log("privilegeCode (id=".$privilegeCode->id.", privilege_code=".$privilegeCode->privilege_code.", sales_manager=".$privilegeCode->sales_manager.")");
 
         try {
             if (false === $privilegeCode->update()) {
@@ -623,20 +751,20 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
      *
      * @param int $customerId
      * @param string $privilege_code
-     * @param int $private_sponsor
+     * @param int $sales_manager
      *
      * @return PrivilegeCode
      *
      * @throws CannotCreatePrivilegeCodeException
      */
-    protected function createPrivilegeCode(int $customerId, string $privilege_code = "", int $private_sponsor = 0)
+    protected function createPrivilegeCode(int $customerId, string $privilege_code = "", int $sales_manager = 0)
     {
         try {
             $privilegeCode = new PrivilegeCode();
             $privilegeCode->id_customer = $customerId;
             $privilegeCode->privilege_code = $privilege_code;
-            $privilegeCode->private_sponsor = $private_sponsor;
-
+            $privilegeCode->sales_manager = $sales_manager;
+            error_log("Je sauvegarde le PrivilegeCode (customerId=$customerId, privilege_code=$privilege_code, sales_manager=$sales_manager) en BDD");
             if (false === $privilegeCode->save()) {
                 $msg = $this->l('An error occurred when creating privilegeCode with customer id');
                 throw new CannotCreatePrivilegeCodeException(
@@ -723,44 +851,12 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
                 ),
                 'input' => array(
                     array(
-                        'type' => 'switch',
-                        'label' => $this->l('Live mode'),
-                        'name' => 'SBU_PRIVILEGE_LIVE_MODE',
-                        'is_bool' => true,
-                        'desc' => $this->l('Use this module in live mode'),
-                        'values' => array(
-                            array(
-                                'id' => 'active_on',
-                                'value' => true,
-                                'label' => $this->l('Enabled')
-                            ),
-                            array(
-                                'id' => 'active_off',
-                                'value' => false,
-                                'label' => $this->l('Disabled')
-                            )
-                        ),
-                    ),
-                    array(
                         'col' => 3,
                         'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Enter a valid email address'),
-                        'name' => 'SBU_PRIVILEGE_ACCOUNT_EMAIL',
-                        'label' => $this->l('Email'),
-                    ),
-                    array(
-                        'type' => 'password',
-                        'name' => 'SBU_PRIVILEGE_ACCOUNT_PASSWORD',
-                        'label' => $this->l('Password'),
-                    ),
-                    array(
-                        'col' => 3,
-                        'type' => 'text',
-                        'prefix' => '<i class="icon icon-envelope"></i>',
-                        'desc' => $this->l('Select group for commercial'),
-                        'name' => 'SBU_PRIVILEGE_COMMERCIAL_GROUP_ID',
-                        'label' => $this->l('Group for commercials'),
+                        'prefix' => '<i class="icon icon-group"></i>',
+                        'desc' => $this->l('Select group for sales managers'),
+                        'name' => 'SBU_PRIVILEGE_SALES_MANAGER_GROUP_ID',
+                        'label' => $this->l('Group for sales managers'),
                     ),
                 ),
                 'submit' => array(
@@ -776,10 +872,7 @@ public function hookActionAfterDeleteCustomerFormHandler(array $params)
     protected function getConfigFormValues()
     {
         return array(
-            'SBU_PRIVILEGE_LIVE_MODE' => Configuration::get('SBU_PRIVILEGE_LIVE_MODE', true),
-            'SBU_PRIVILEGE_ACCOUNT_EMAIL' => Configuration::get('SBU_PRIVILEGE_ACCOUNT_EMAIL', 'contact@prestashop.com'),
-            'SBU_PRIVILEGE_ACCOUNT_PASSWORD' => Configuration::get('SBU_PRIVILEGE_ACCOUNT_PASSWORD', null),
-            'SBU_PRIVILEGE_COMMERCIAL_GROUP_ID' => Configuration::get('SBU_PRIVILEGE_COMMERCIAL_GROUP_ID', null),
+            'SBU_PRIVILEGE_SALES_MANAGER_GROUP_ID' => Configuration::get('SBU_PRIVILEGE_SALES_MANAGER_GROUP_ID', null),
         );
     }
 

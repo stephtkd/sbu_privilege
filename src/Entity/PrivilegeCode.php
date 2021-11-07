@@ -27,13 +27,18 @@ class PrivilegeCode extends ObjectModel
      */
     public $privilege_code;
 
+    /**
+     * @var int
+     */
+    public $sales_manager;
+
     public static $definition = [
         'table' => 'sbu_privilege_code',
         'primary' => 'id_privilege_code',
         'fields' => [
             'id_customer' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
             'privilege_code' => ['type' => self::TYPE_STRING, 'validate' => 'isGenericName', 'size' => 45],
-            'private_sponsor' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
+            'sales_manager' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
         ],
     ];
 }

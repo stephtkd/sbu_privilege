@@ -3,13 +3,12 @@
 ## Description ##
 
 Permet de mettre en place un système de parrainage (ou d'affiliation) appelé `code privilège`.  
-D'un côté, on a les "parrains", appelés "parrains particuliers" s'ils sont particuliers ou "parrains pro" s'ils sont professionnels (on peut aussi dire "commerciaux").  
-Les clients s'inscrivent avec un code privilège qui correspond au code d'un parrain. Le parrain touchera des commissions sur toutes les ventes effectuées avec son code privilège.  
-Le parrain doit être placé (manuellement) dans le groupe `Parrain pro` pour un professionnel, après validation de son identité.  
-Le parrain doit être placé (manuellement) dans le groupe `Parrain particulier` pour un particulier, après validation de son identité.  
-Le client privilégié doit être placé (manuellement) dans le groupe `Client privilégié`, après vérification de son code privilège.  
-Le client peut aussi être un professionnel. Dans ce cas, il doit être placé (manuellement) dans le groupe `Professionnel privilégié`, après vérification de son code privilège.  
-Il faut indiquer dans la configuration du module quel group joue le rôle du groupe `Parrains Pro` et quel groupe joue le rôle de `Parrain particulier`  
+D'un côté, on a les "responsables des ventes" ou commerciaux.
+Les clients s'inscrivent avec un code privilège qui correspond au code privilège du responsable des ventes. Le parrain touchera des commissions sur toutes les ventes effectuées avec son code privilège.  
+Le parrain doit être placé (manuellement) dans le groupe `Commercial` pour un professionnel, après validation de son identité.  
+Le client privilégié sera placé (automatiqument) dans le groupe `Client privilégié`, si son code privilège correpond bien à celui de son responsable des ventes.  
+Le client peut aussi être un professionnel. Dans ce cas, il doit être placé (manuellement) dans le groupe `Professionnel privilégié`, après vérification de son code privilège et de son SIREN.  
+Il faut indiquer dans la configuration du module quel group joue le rôle du groupe `Parrains Pro`  
 
 ## versions PrestaShop Supportées ##
 
@@ -39,6 +38,9 @@ Il faut indiquer dans la configuration du module quel group joue le rôle du gro
 
 
 ## Historique des versions ##
+### v 1.2.3  ###
+- Finalement pour les affiliés on s'inscrit via un site externe. On retire donc la case à cocher du formulaire d'inscription pour le remplacer par une case à cocher pour devenir responsable des ventes
+
 ### v 1.2.2  ###
 - Correction du bug qui ne permettait plus de modifier un client
 
